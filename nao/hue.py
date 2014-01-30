@@ -63,6 +63,16 @@ class HueMqttControll(object):
         self._mqtt = None
 
 
+    def _make_topic(self, lamp, action):
+        """
+        Prepares the MQTT topic for the given action
+
+        :param lamp: Hue lamp ID (1,2,3)
+        :param action: Action on the lamp (color, percent)
+        """
+        return "/nao/openhab/hue{0}/{1}".format(lamp, action)
+
+
     def color(self, lamp, color):
         """
         Change color of hue
@@ -71,7 +81,7 @@ class HueMqttControll(object):
         :param color: String color (blue, bleu, ...)
         """
         color_value = COLOR_MAP.get(color.lower(), DEFAULT_COLOR)
-        self._mqtt.publish("/hue{0}/color".format(lamp), str(color_value))
+        self._mqtt.publish(self._make_topic(lamp, "color"), str(color_value))
 
 
     def percent(self, lamp, value):
@@ -86,6 +96,4 @@ class HueMqttControll(object):
         elif value > 100:
             value = 100
 
-        _logger.debug("Sending value: %s", value)
-
-        self._mqtt.publish("/hue{0}/percent".format(lamp), str(value))
+        self._mqtt.publish(self._make_topic(lamp, "percent"), str(value))

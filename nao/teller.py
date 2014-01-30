@@ -31,7 +31,7 @@ _logger = logging.getLogger(__name__)
 @Requires('_nao', 'nao.core')
 @Provides('nao.teller')
 @Provides(services.SERVICE_MQTT_LISTENER)
-@Property('_topics', services.PROP_MQTT_TOPICS, '/openhab/+')
+@Property('_topics', services.PROP_MQTT_TOPICS, '/openhab/nao/+')
 @Instantiate('nao-teller')
 class NaoStateTeller(object):
     """
@@ -57,16 +57,19 @@ class NaoStateTeller(object):
         """
         An MQTT message has been received
         """
-        item = topic.split('/')[2]
+        # Topics: /openhab/nao/[door,temperature,weather]
+        item = topic.split('/')[3]
 
         # Store state
         if item == "door":
             self._door_state = payload
 
         elif item == "temperature":
+            # Replace '.' by ',' in numbers (better TTS results)
             self._last_temperature = payload.replace('.', ',')
 
         elif item == "weather":
+            # Replace '.' by ',' in numbers (better TTS results)
             self._last_weather = payload.replace('.', ',')
 
 
