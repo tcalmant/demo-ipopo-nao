@@ -27,16 +27,16 @@ _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
 
-COLOR_MAP = {'red': 101,
-             'green': 102,
-             'yellow': 103,
-             'blue': 104,
+COLOR_MAP = {'red': 1,
+             'green': 2,
+             'yellow': 3,
+             'blue': 4,
 
              # French translation
-             'rouge': 101,
-             'vert': 102,
-             'jaune': 103,
-             'bleu': 104
+             'rouge': 1,
+             'vert': 2,
+             'jaune': 3,
+             'bleu': 4
              }
 """
 OpenHAB MQTT color map
