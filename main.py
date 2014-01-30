@@ -36,6 +36,7 @@ HumanGreeter = None
 memory = None
 speechrecog = None
 tts = None
+isDoneSpeaking =True
 
 _logger = logging.getLogger(__name__)
 
@@ -58,6 +59,7 @@ class NaoTouchModule(ALModule):
         # Create a proxy to ALTextToSpeech for later use
         global tts
         tts = ALProxy("ALTextToSpeech", NAO_IP, 9559)
+        tts.enableNotifications()
 
         # Subscribe to the FaceDetected event:
         global memory
@@ -66,6 +68,10 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("MiddleTactilTouched",
             "HumanGreeter",
             "onMiddleTouchSensed")
+        memory.subscribeToEvent("ALTextToSpeech/TextDone", 
+            "HumanGreeter",
+            "onDoneSpeaking")
+            
         # memory.unsubscribeToEvent("WordRecognized",
         #    "HumanGreeter")
         speechrecog = ALProxy("ALSpeechRecognition")
@@ -119,7 +125,9 @@ class NaoTouchModule(ALModule):
 
         elif item == "meteo":
             self._teller.say_weather()
-
+    def onDoneSpeaking(self, key, value, message):
+        isDoneSpeaking=value
+        pass
 
     def onSpeechRecognized(self, *_args):
         """
@@ -154,13 +162,14 @@ class NaoTouchModule(ALModule):
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
+        
         try:
             memory.unsubscribeToEvent("MiddleTactilTouched",
                                       "HumanGreeter")
         except BaseException as ex:
             _logger.warning("onMiddleTouch: Got exception %s", ex)
             return
-
+        isDoneSpeaking=False
         tts.say("Je vous écoute")
 
         memory.subscribeToEvent("WordRecognized",
@@ -177,6 +186,7 @@ class NaoTouchModule(ALModule):
         """
         Says something
         """
+        isDoneSpeaking=False
         tts.say(sentence)
 
 
