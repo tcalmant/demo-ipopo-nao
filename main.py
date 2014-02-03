@@ -29,7 +29,7 @@ from pelix.ipopo.constants import use_ipopo
 #-------------------------------------------------------------------------------
 
 # Nao IP address
-NAO_IP = "192.168.0.101"
+NAO_IP = "nao.local"
 
 # Global variable to store the HumanGreeter module instance
 HumanGreeter = None
@@ -39,8 +39,13 @@ managerProxy = None
 tts = None
 isDoneSpeaking =True
 colorwordList = ["bleu", "rouge", "vert", "jaune"]
-wordList = ["porte", "température", "meteo"]
+
+
 radioList = ["radio", "change", "off"]
+
+wordList = ["hello","porte", "température", "meteo","bye"]
+behaviourList =["dance_twist", "show_right", "show_left","Hello","Applause_1", "Salute_1",'SpaceShuttle', 'mysticalpower', 'stretch1', 'stretch2', 'stretch3', 'winner']
+
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +53,6 @@ _logger = logging.getLogger(__name__)
 
 class NaoTouchModule(ALModule):
     """ A simple module able to touch events
-
     """
     def __init__(self, name):
         ALModule.__init__(self, name)
@@ -79,6 +83,9 @@ class NaoTouchModule(ALModule):
             "onDoneSpeaking")
         # Proxy to launch behaviour embedded on the robot
         managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
+        # Proxy to launch behaviour embedded on the robot
+        motion = ALProxy("ALMotion", "nao.local", 9559)
+        motion.setStiffnesses("Body", 1.0)
             
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
@@ -90,6 +97,7 @@ class NaoTouchModule(ALModule):
         except Exception as ex:
             _logger.warning("Got exception: %s", ex)
 
+        launchBehavior(managerProxy, "Hello")
         tts.say("Je suis prêt à recevoir des ordres")
 
     def getBehaviors(self, managerProxy):
@@ -103,6 +111,37 @@ class NaoTouchModule(ALModule):
         print "Running behaviors:"
         print names
         
+    def launchBehavior(self, managerProxy, behaviorName):
+        ''' Launch and stop a behavior, if possible. '''
+
+        # Check that the behavior exists.
+        if (managerProxy.isBehaviorInstalled(behaviorName)):
+            # Check that it is not already running.
+            if (not managerProxy.isBehaviorRunning(behaviorName)):
+                # Launch behavior. This is a blocking call, use post if you do not
+                # want to wait for the behavior to finish.
+                managerProxy.post.runBehavior(behaviorName)
+                time.sleep(0.5)
+            else:
+                print "Behavior is already running."
+        
+        else:
+            print "Behavior not found."
+            return
+    
+#       names = managerProxy.getRunningBehaviors()
+#       print "Running behaviors:"
+#       print names
+
+    def stopBehavior(self, managerProxy, behaviorName):
+        # Stop the behavior.
+        if (managerProxy.isBehaviorRunning(behaviorName)):
+            managerProxy.stopBehavior(behaviorName)
+            time.sleep(1.0)
+        else:
+            print "Behavior is already stopped."
+
+ 
     def changeLed(self, color):
         """
         Changes the LEDs on the robot
@@ -122,6 +161,7 @@ class NaoTouchModule(ALModule):
 
         # Change LEDs on the Robot
         self.leds.fadeRGB('AllLeds', rgb, duration)
+        
 
         if self._hue is not None:
             # Change lamp color
@@ -158,11 +198,11 @@ class NaoTouchModule(ALModule):
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-
+        launchBehaviour(managerProxy,"mentalist)
         words = memory.getData("WordRecognized");
         word = words[0]
         _logger.info("Heard %s (%s)", word, words)
-
+        
         if word in ("porte", "meteo", "température"):
             # State order
             self.onStateRequest(word)
@@ -170,7 +210,7 @@ class NaoTouchModule(ALModule):
         else:
             # Color given
             self.changeLed(words[0])
-
+            launchBehaviour(managerProxy,'show_right')
         time.sleep(1)
 
         # Subscribe again to the event
@@ -202,6 +242,7 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("MiddleTactilTouched",
             "HumanGreeter",
             "onMiddleTouchSensed")
+        
             
     def onFrontTouchSensed(self, *_args):
         """
