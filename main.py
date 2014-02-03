@@ -37,7 +37,7 @@ memory = None
 speechrecog = None
 managerProxy = None
 tts = None
-isDoneSpeaking =True
+#isDoneSpeaking =True
 colorwordList = ["bleu", "rouge", "vert", "jaune"]
 wordList = ["hello","porte", "température", "meteo","bye"]
 behaviourList =["dance_twist", "show_right", "show_left","Hello","Applause_1", "Salute_1",'SpaceShuttle', 'mysticalpower', 'stretch1', 'stretch2', 'stretch3', 'winner']
@@ -72,15 +72,16 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("FrontTactilTouched",
             "HumanGreeter",
             "onFrontTouchSensed")
-        memory.subscribeToEvent("ALTextToSpeech/TextDone", 
-            "HumanGreeter",
-            "onDoneSpeaking")
+#         memory.subscribeToEvent("ALTextToSpeech/TextDone", 
+#             "HumanGreeter",
+#             "onDoneSpeaking")
         # Proxy to launch behaviour embedded on the robot
         managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
         # Proxy to launch behaviour embedded on the robot
         motion = ALProxy("ALMotion", "nao.local", 9559)
         motion.setStiffnesses("Body", 1.0)
-            
+         
+        motion.wakeup()    
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
         
@@ -91,7 +92,7 @@ class NaoTouchModule(ALModule):
         except Exception as ex:
             _logger.warning("Got exception: %s", ex)
 
-        launchBehavior(managerProxy, "Hello")
+        self.launchBehavior(managerProxy, "Hello")
         tts.say("Je suis prêt à recevoir des ordres")
 
     def getBehaviors(self, managerProxy):
@@ -175,9 +176,9 @@ class NaoTouchModule(ALModule):
         elif item == "meteo":
             self._teller.say_weather()
     
-    def onDoneSpeaking(self, key, value, message):
-        isDoneSpeaking=value
-        pass
+#     def onDoneSpeaking(self, key, value, message):
+#         self.isDoneSpeaking=value
+#         pass
 
     def onSpeechRecognized(self, *_args):
         """
@@ -185,7 +186,7 @@ class NaoTouchModule(ALModule):
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-        launchBehaviour(managerProxy,"mentalist)
+        self.launchBehaviour(managerProxy,"mentalist")
         words = memory.getData("WordRecognized");
         word = words[0]
         _logger.info("Heard %s (%s)", word, words)
@@ -197,7 +198,7 @@ class NaoTouchModule(ALModule):
         else:
             # Color given
             self.changeLed(words[0])
-            launchBehaviour(managerProxy,'show_right')
+            self.launchBehaviour(managerProxy,'show_right')
         time.sleep(1)
 
         # Subscribe again to the event
@@ -218,7 +219,7 @@ class NaoTouchModule(ALModule):
         except BaseException as ex:
             _logger.warning("onMiddleTouch: Got exception %s", ex)
             return
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say("Je vous écoute")
 
         memory.subscribeToEvent("WordRecognized",
@@ -245,7 +246,7 @@ class NaoTouchModule(ALModule):
         except BaseException as ex:
             _logger.warning("onFrontTouch: Got exception %s", ex)
             return
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say("Je vous écoute")
 
         memory.subscribeToEvent("WordRecognized",
@@ -262,7 +263,7 @@ class NaoTouchModule(ALModule):
         """
         Says something
         """
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say(sentence)
 
 
