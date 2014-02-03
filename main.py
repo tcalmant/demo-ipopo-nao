@@ -82,19 +82,19 @@ class NaoTouchModule(ALModule):
 #             "HumanGreeter",
 #             "onDoneSpeaking")
         # Proxy to launch behaviour embedded on the robot
+        global managerProxy
         managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
-        # Proxy to launch behaviour embedded on the robot
+        
         motion = ALProxy("ALMotion", NAO_IP, 9559)
         motion.setStiffnesses("Body", 1.0)
-         
-        motion.goToPosture("StandInit", 0.5)
+        self.getBehaviors(managerProxy)
+        self.launchBehavior(managerProxy, "Neutral")
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
         
 
         try:
-            speechrecog.setVocabulary(wordList, True)
-
+            speechrecog.setVocabulary(colorwordList, True)
         except Exception as ex:
             _logger.warning("Got exception: %s", ex)
 
@@ -225,7 +225,7 @@ class NaoTouchModule(ALModule):
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-        speechrecog.setVocabulary(wordList, True)
+        #speechrecog.setVocabulary(wordList, True)
         try:
             memory.unsubscribeToEvent("MiddleTactilTouched",
                                       "HumanGreeter")
