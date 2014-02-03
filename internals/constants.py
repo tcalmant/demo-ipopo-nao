@@ -13,6 +13,26 @@ __docformat__ = "restructuredtext en"
 
 #-------------------------------------------------------------------------------
 
+# Standard library
+import sys
+
+#-------------------------------------------------------------------------------
+
+def register_almodule(name, module):
+    """
+    Registers an ALModule as a global in the main module.
+    """
+    setattr(sys.modules['__main__'], name, module)
+
+
+def unregister_almodule(name):
+    """
+    Unregisters an ALModule from the main module.
+    """
+    delattr(sys.modules['__main__'], name)
+
+#-------------------------------------------------------------------------------
+
 SERVICE_TTS = "nao.internals.tts"
 """
 Specification of the Text-To-Speech service:
