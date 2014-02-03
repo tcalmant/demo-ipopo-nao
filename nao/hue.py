@@ -13,9 +13,12 @@ __docformat__ = "restructuredtext en"
 
 #-------------------------------------------------------------------------------
 
+# Nao Internals
+import internals.constants
+
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
-    Instantiate
+    Instantiate, Validate, Invalidate
 import pelix.services
 
 # Standard library
@@ -49,6 +52,7 @@ DEFAULT_COLOR = COLOR_MAP['blue']
 
 @ComponentFactory('hue-control-mqtt')
 @Provides('nao.hue')
+@Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Instantiate('hue-control-mqtt')
 class HueMqttControll(object):
@@ -61,6 +65,7 @@ class HueMqttControll(object):
         """
         # Injected service
         self._mqtt = None
+        self._speech = None
 
 
     def _make_topic(self, lamp, action):
@@ -97,3 +102,21 @@ class HueMqttControll(object):
             value = 100
 
         self._mqtt.publish(self._make_topic(lamp, "percent"), str(value))
+
+
+    @Validate
+    def _validate(self, context):
+        """
+        Component validated
+        """
+        # Register to some words
+        self._speech.add_listener(self, list(COLOR_MAP.keys()))
+
+
+    @Invalidate
+    def _invalidate(self, context):
+        """
+        Component invalidated
+        """
+        # Unregister from speech recognition
+        self._speech.remove_listener(self)
