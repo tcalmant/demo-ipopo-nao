@@ -68,6 +68,9 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("MiddleTactilTouched",
             "HumanGreeter",
             "onMiddleTouchSensed")
+        memory.subscribeToEvent("FrontTactilTouched",
+            "HumanGreeter",
+            "onFrontTouchSensed")
         memory.subscribeToEvent("ALTextToSpeech/TextDone", 
             "HumanGreeter",
             "onDoneSpeaking")
@@ -178,6 +181,32 @@ class NaoTouchModule(ALModule):
 
         # Subscribe again to the event
         memory.subscribeToEvent("MiddleTactilTouched",
+            "HumanGreeter",
+            "onMiddleTouchSensed")
+            
+    def onFrontTouchSensed(self, *_args):
+        """
+        This will be called each time a face is
+        detected.
+        """
+        # Unsubscribe to the event when talking,
+        # to avoid repetitions
+        
+        try:
+            memory.unsubscribeToEvent("FrontTactilTouched",
+                                      "HumanGreeter")
+        except BaseException as ex:
+            _logger.warning("onFrontTouch: Got exception %s", ex)
+            return
+        isDoneSpeaking=False
+        tts.say("Je vous écoute")
+
+        memory.subscribeToEvent("WordRecognized",
+            "HumanGreeter",
+            "onSpeechRecognized")
+
+        # Subscribe again to the event
+        memory.subscribeToEvent("FrontTactilTouched",
             "HumanGreeter",
             "onMiddleTouchSensed")
 
