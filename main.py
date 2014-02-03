@@ -81,7 +81,7 @@ class NaoTouchModule(ALModule):
         motion = ALProxy("ALMotion", "nao.local", 9559)
         motion.setStiffnesses("Body", 1.0)
          
-        motion.wakeup()    
+        motion.goToPosture("StandInit", 0.5)
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
         
