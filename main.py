@@ -40,6 +40,7 @@ tts = None
 isDoneSpeaking =True
 colorwordList = ["bleu", "rouge", "vert", "jaune"]
 wordList = ["porte", "température", "meteo"]
+radioList = ["radio", "change", "off"]
 
 _logger = logging.getLogger(__name__)
 
@@ -54,6 +55,8 @@ class NaoTouchModule(ALModule):
 
         # HUE service
         self._hue = None
+        # Radio service
+        self._radio = None
         self._teller = None
 
         # Create a proxy to ALTextToSpeech for later use
@@ -123,6 +126,13 @@ class NaoTouchModule(ALModule):
         if self._hue is not None:
             # Change lamp color
             self._hue.color(1, color)
+
+
+    def changeRadio(self, station_number):
+    
+        if self._radio is not None:
+            # Change lamp color
+            self._radio.station(station_number)
 
 
     def onStateRequest(self, item):
@@ -234,6 +244,13 @@ class NaoTouchModule(ALModule):
         """
         self._hue = service
 
+    def set_radio_service(self, service):
+        """
+        Sets the radio service
+        """
+        self._radio = service
+
+
 
     def set_teller_service(self, service):
         """
@@ -291,6 +308,7 @@ def main(pip, pport):
                                   # Nao
                                   'nao.shell',
                                   'nao.hue',
+                                  'nao.radio',
                                   'nao.teller',
                                   'nao.binder'))
     framework.start()
