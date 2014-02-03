@@ -32,13 +32,11 @@ class NaoSpeechRecognition(ALModule):
     """
     Nao speech recognition service
     """
-    def __init__(self, name, nao_ip="nao.local", nao_port=9559):
+    def __init__(self, name):
         """
         Sets up members
 
         :param name: ALModule name
-        :param nao_ip: IP of the Nao robot
-        :param nao_port: Port of the daemon on Nao
         """
         # Store the name
         self.__name = name
@@ -144,7 +142,6 @@ class NaoSpeechRecognition(ALModule):
 
 class BundleActivator(object):
     """
-
     Bundle activator, for Pelix
     """
     def __init__(self):
@@ -157,13 +154,17 @@ class BundleActivator(object):
         # Service
         self.__svc = None
 
+        # ALModule name
+        self.__name = __name__.replace('.', '_')
+
 
     def start(self, context):
         """
         Registers the service
         """
         # Prepare the service
-        self.__svc = NaoSpeechRecognition(__name__)
+        self.__svc = NaoSpeechRecognition(self.__name)
+        constants.register_almodule(self.__name, self.__svc)
 
         # Register it
         self.__reg = context.register_service(constants.SERVICE_SPEECH,
@@ -179,6 +180,7 @@ class BundleActivator(object):
         self.__reg = None
 
         # Clean it up
+        constants.unregister_almodule(self.__name)
         self.__svc.clear()
         self.__svc = None
 

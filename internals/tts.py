@@ -33,12 +33,12 @@ class NaoTTS(object):
     """
     Nao text-to-speech service
     """
-    def __init__(self, nao_ip="nao.local", nao_port=9559):
+    def __init__(self):
         """
         Sets up members
         """
         # Set up the TTS proxy
-        self._tts = ALProxy("ALTextToSpeech", nao_ip, nao_port)
+        self._tts = ALProxy("ALTextToSpeech")
 
         # Authorization to speak
         self._can_speak = threading.Event()
