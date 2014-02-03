@@ -47,6 +47,7 @@ wordList = ["hello","porte", "température", "meteo","bye"]
 behaviourList =["dance_twist", "show_right", "show_left","Hello","Applause_1", "Salute_1",'SpaceShuttle', 'mysticalpower', 'stretch1', 'stretch2', 'stretch3', 'winner']
 
 
+
 _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
@@ -180,6 +181,7 @@ class NaoTouchModule(ALModule):
         """
         Requests the state of an item
         """
+        
         if item == "porte":
             self._teller.say_door()
 
@@ -188,6 +190,13 @@ class NaoTouchModule(ALModule):
 
         elif item == "meteo":
             self._teller.say_weather()
+            #some functionalty of radio (radio: first station, change: second station, off: no station)
+        elif item == "radio":
+            self._radio.station("radio")
+        elif item == "change":
+            self._radio.station("change")
+        elif item == "off":
+            self._radio.station("off")    
     
 #     def onDoneSpeaking(self, key, value, message):
 #         self.isDoneSpeaking=value
@@ -204,7 +213,7 @@ class NaoTouchModule(ALModule):
         word = words[0]
         _logger.info("Heard %s (%s)", word, words)
         
-        if word in ("porte", "meteo", "température"):
+        if word in ("porte", "meteo", "température", "radio", "change", "off"):
             # State order
             self.onStateRequest(word)
 
