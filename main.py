@@ -29,7 +29,7 @@ from pelix.ipopo.constants import use_ipopo
 #-------------------------------------------------------------------------------
 
 # Nao IP address
-NAO_IP = "192.168.0.101"
+NAO_IP = "nao.local"
 
 # Global variable to store the HumanGreeter module instance
 HumanGreeter = None
@@ -37,9 +37,15 @@ memory = None
 speechrecog = None
 managerProxy = None
 tts = None
-isDoneSpeaking =True
+#isDoneSpeaking =True
 colorwordList = ["bleu", "rouge", "vert", "jaune"]
-wordList = ["porte", "température", "meteo"]
+
+
+radioList = ["radio", "change", "off"]
+
+wordList = ["hello","porte", "température", "meteo","bye"]
+behaviourList =["dance_twist", "show_right", "show_left","Hello","Applause_1", "Salute_1",'SpaceShuttle', 'mysticalpower', 'stretch1', 'stretch2', 'stretch3', 'winner']
+
 
 _logger = logging.getLogger(__name__)
 
@@ -47,13 +53,14 @@ _logger = logging.getLogger(__name__)
 
 class NaoTouchModule(ALModule):
     """ A simple module able to touch events
-
     """
     def __init__(self, name):
         ALModule.__init__(self, name)
 
         # HUE service
         self._hue = None
+        # Radio service
+        self._radio = None
         self._teller = None
 
         # Create a proxy to ALTextToSpeech for later use
@@ -71,12 +78,16 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("FrontTactilTouched",
             "HumanGreeter",
             "onFrontTouchSensed")
-        memory.subscribeToEvent("ALTextToSpeech/TextDone", 
-            "HumanGreeter",
-            "onDoneSpeaking")
+#         memory.subscribeToEvent("ALTextToSpeech/TextDone", 
+#             "HumanGreeter",
+#             "onDoneSpeaking")
         # Proxy to launch behaviour embedded on the robot
         managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
-            
+        # Proxy to launch behaviour embedded on the robot
+        motion = ALProxy("ALMotion", NAO_IP, 9559)
+        motion.setStiffnesses("Body", 1.0)
+         
+        motion.goToPosture("StandInit", 0.5)
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
         
@@ -87,6 +98,7 @@ class NaoTouchModule(ALModule):
         except Exception as ex:
             _logger.warning("Got exception: %s", ex)
 
+        self.launchBehavior(managerProxy, "Hello")
         tts.say("Je suis prêt à recevoir des ordres")
 
     def getBehaviors(self, managerProxy):
@@ -100,6 +112,37 @@ class NaoTouchModule(ALModule):
         print "Running behaviors:"
         print names
         
+    def launchBehavior(self, managerProxy, behaviorName):
+        ''' Launch and stop a behavior, if possible. '''
+
+        # Check that the behavior exists.
+        if (managerProxy.isBehaviorInstalled(behaviorName)):
+            # Check that it is not already running.
+            if (not managerProxy.isBehaviorRunning(behaviorName)):
+                # Launch behavior. This is a blocking call, use post if you do not
+                # want to wait for the behavior to finish.
+                managerProxy.post.runBehavior(behaviorName)
+                time.sleep(0.5)
+            else:
+                print "Behavior is already running."
+        
+        else:
+            print "Behavior not found."
+            return
+    
+#       names = managerProxy.getRunningBehaviors()
+#       print "Running behaviors:"
+#       print names
+
+    def stopBehavior(self, managerProxy, behaviorName):
+        # Stop the behavior.
+        if (managerProxy.isBehaviorRunning(behaviorName)):
+            managerProxy.stopBehavior(behaviorName)
+            time.sleep(1.0)
+        else:
+            print "Behavior is already stopped."
+
+ 
     def changeLed(self, color):
         """
         Changes the LEDs on the robot
@@ -119,10 +162,18 @@ class NaoTouchModule(ALModule):
 
         # Change LEDs on the Robot
         self.leds.fadeRGB('AllLeds', rgb, duration)
+        
 
         if self._hue is not None:
             # Change lamp color
             self._hue.color(1, color)
+
+
+    def changeRadio(self, station_number):
+    
+        if self._radio is not None:
+            # Change lamp color
+            self._radio.station(station_number)
 
 
     def onStateRequest(self, item):
@@ -138,9 +189,9 @@ class NaoTouchModule(ALModule):
         elif item == "meteo":
             self._teller.say_weather()
     
-    def onDoneSpeaking(self, key, value, message):
-        isDoneSpeaking=value
-        pass
+#     def onDoneSpeaking(self, key, value, message):
+#         self.isDoneSpeaking=value
+#         pass
 
     def onSpeechRecognized(self, *_args):
         """
@@ -148,11 +199,11 @@ class NaoTouchModule(ALModule):
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-
+        self.launchBehaviour(managerProxy,"mentalist")
         words = memory.getData("WordRecognized");
         word = words[0]
         _logger.info("Heard %s (%s)", word, words)
-
+        
         if word in ("porte", "meteo", "température"):
             # State order
             self.onStateRequest(word)
@@ -160,7 +211,7 @@ class NaoTouchModule(ALModule):
         else:
             # Color given
             self.changeLed(words[0])
-
+            self.launchBehaviour(managerProxy,'show_right')
         time.sleep(1)
 
         # Subscribe again to the event
@@ -181,7 +232,7 @@ class NaoTouchModule(ALModule):
         except BaseException as ex:
             _logger.warning("onMiddleTouch: Got exception %s", ex)
             return
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say("Je vous écoute")
 
         memory.subscribeToEvent("WordRecognized",
@@ -192,6 +243,7 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("MiddleTactilTouched",
             "HumanGreeter",
             "onMiddleTouchSensed")
+        
             
     def onFrontTouchSensed(self, *_args):
         """
@@ -207,7 +259,7 @@ class NaoTouchModule(ALModule):
         except BaseException as ex:
             _logger.warning("onFrontTouch: Got exception %s", ex)
             return
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say("Je vous écoute")
 
         memory.subscribeToEvent("WordRecognized",
@@ -224,7 +276,7 @@ class NaoTouchModule(ALModule):
         """
         Says something
         """
-        isDoneSpeaking=False
+        #self.isDoneSpeaking=False
         tts.say(sentence)
 
 
@@ -233,6 +285,13 @@ class NaoTouchModule(ALModule):
         Sets the hue service
         """
         self._hue = service
+
+    def set_radio_service(self, service):
+        """
+        Sets the radio service
+        """
+        self._radio = service
+
 
 
     def set_teller_service(self, service):
@@ -291,6 +350,7 @@ def main(pip, pport):
                                   # Nao
                                   'nao.shell',
                                   'nao.hue',
+                                  'nao.radio',
                                   'nao.teller',
                                   'nao.binder'))
     framework.start()
