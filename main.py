@@ -29,28 +29,28 @@ from pelix.ipopo.constants import use_ipopo
 #-------------------------------------------------------------------------------
 
 # Nao IP address
-NAO_IP = "nao.local"
+NAO_IP = "192.168.0.101"
 
 # Global variable to store the HumanGreeter module instance
 HumanGreeter = None
 memory = None
 speechrecog = None
+managerProxy = None
 tts = None
 isDoneSpeaking =True
+colorwordList = ["bleu", "rouge", "vert", "jaune"]
+wordList = ["porte", "température", "meteo"]
 
 _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
 
 class NaoTouchModule(ALModule):
-    """ A simple module able to react
-    to facedetection events
+    """ A simple module able to touch events
 
     """
     def __init__(self, name):
         ALModule.__init__(self, name)
-        # No need for IP and port here because
-        # we have our Python broker connected to NAOqi broker
 
         # HUE service
         self._hue = None
@@ -61,7 +61,7 @@ class NaoTouchModule(ALModule):
         tts = ALProxy("ALTextToSpeech", NAO_IP, 9559)
         tts.enableNotifications()
 
-        # Subscribe to the FaceDetected event:
+        # Subscribe to the Touch and text to speech event:
         global memory
         self.leds = ALProxy("ALLeds", NAO_IP, 9559)
         memory = ALProxy("ALMemory")
@@ -74,13 +74,12 @@ class NaoTouchModule(ALModule):
         memory.subscribeToEvent("ALTextToSpeech/TextDone", 
             "HumanGreeter",
             "onDoneSpeaking")
+        # Proxy to launch behaviour embedded on the robot
+        managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
             
-        # memory.unsubscribeToEvent("WordRecognized",
-        #    "HumanGreeter")
         speechrecog = ALProxy("ALSpeechRecognition")
         speechrecog.setLanguage("French")
-        wordList = ["bleu", "rouge", "vert", "jaune",
-                    "porte", "température", "meteo"]
+        
 
         try:
             speechrecog.setVocabulary(wordList, True)
@@ -90,7 +89,17 @@ class NaoTouchModule(ALModule):
 
         tts.say("Je suis prêt à recevoir des ordres")
 
+    def getBehaviors(self, managerProxy):
+        ''' Know which behaviors are on the robot '''
 
+        names = managerProxy.getInstalledBehaviors()
+        print "Behaviors on the robot:"
+        print names
+
+        names = managerProxy.getRunningBehaviors()
+        print "Running behaviors:"
+        print names
+        
     def changeLed(self, color):
         """
         Changes the LEDs on the robot
@@ -128,6 +137,7 @@ class NaoTouchModule(ALModule):
 
         elif item == "meteo":
             self._teller.say_weather()
+    
     def onDoneSpeaking(self, key, value, message):
         isDoneSpeaking=value
         pass
@@ -160,12 +170,11 @@ class NaoTouchModule(ALModule):
 
     def onMiddleTouchSensed(self, *_args):
         """
-        This will be called each time a face is
-        detected.
+        Commands : door, temprature, meteo
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-        
+        speechrecog.setVocabulary(wordList, True)
         try:
             memory.unsubscribeToEvent("MiddleTactilTouched",
                                       "HumanGreeter")
