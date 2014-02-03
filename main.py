@@ -84,7 +84,7 @@ class NaoTouchModule(ALModule):
         # Proxy to launch behaviour embedded on the robot
         managerProxy = ALProxy("ALBehaviorManager", NAO_IP, 9559)
         # Proxy to launch behaviour embedded on the robot
-        motion = ALProxy("ALMotion", "nao.local", 9559)
+        motion = ALProxy("ALMotion", NAO_IP, 9559)
         motion.setStiffnesses("Body", 1.0)
          
         motion.goToPosture("StandInit", 0.5)
