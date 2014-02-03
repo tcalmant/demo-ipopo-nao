@@ -189,7 +189,7 @@ class NaoTouchModule(ALModule):
         words = memory.getData("WordRecognized");
         word = words[0]
         _logger.info("Heard %s (%s)", word, words)
-        launchBehaviour(managerProxy,"mentalist)
+        
         if word in ("porte", "meteo", "température"):
             # State order
             self.onStateRequest(word)
@@ -197,7 +197,7 @@ class NaoTouchModule(ALModule):
         else:
             # Color given
             self.changeLed(words[0])
-
+            launchBehaviour(managerProxy,'show_right')
         time.sleep(1)
 
         # Subscribe again to the event
