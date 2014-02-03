@@ -21,6 +21,7 @@ from pelix.ipopo.decorators import ComponentFactory, Requires, Instantiate, \
 
 @ComponentFactory('nao-service-binder')
 @Requires('_hue', 'nao.hue')
+@Requires('_radio', 'nao.radio')
 @Requires('_teller', 'nao.teller')
 @Requires('_nao', 'nao.core')
 @Instantiate('nao-service-binder')
@@ -34,6 +35,7 @@ class HueMqttControll(object):
         """
         # Injected service
         self._hue = None
+        self._radio = None
         self._nao = None
         self._teller = None
 
@@ -44,6 +46,7 @@ class HueMqttControll(object):
         All services are there
         """
         self._nao.set_hue_service(self._hue)
+        self._nao.set_radio_service(self._radio)
         self._nao.set_teller_service(self._teller)
 
 
@@ -53,4 +56,5 @@ class HueMqttControll(object):
         One service is gone
         """
         self._nao.set_hue_service(None)
+        self._nao.set_radio_service(None)
         self._nao.set_teller_service(None)
