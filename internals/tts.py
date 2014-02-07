@@ -3,6 +3,7 @@
 """
 Nao text-to-speech service
 """
+from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides
 
 # Module version
 __version_info__ = (0, 1, 0)
@@ -29,6 +30,9 @@ _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
 
+@ComponentFactory('nao-tts')
+@Provides(constants.SERVICE_TTS)
+@Instantiate('nao-tts')
 class NaoTTS(object):
     """
     Nao text-to-speech service
@@ -86,48 +90,3 @@ class NaoTTS(object):
         if self._can_speak.is_set():
             with self.__speaking_lock:
                 self._can_speak.clear()
-
-#-------------------------------------------------------------------------------
-
-class BundleActivator(object):
-    """
-
-    Bundle activator, for Pelix
-    """
-    def __init__(self):
-        """
-        Sets up members
-        """
-        # Service registration
-        self.__reg = None
-
-        # TTS service
-        self.__svc = None
-
-
-    def start(self, context):
-        """
-        Registers the TTS service
-        """
-        # Prepare the service
-        self.__svc = NaoTTS()
-
-        # Register it
-        self.__reg = context.register_service(constants.SERVICE_TTS,
-                                              self.__svc, {})
-
-
-    def stop(self, context):
-        """
-        Bundle stopped: unregister the service
-        """
-        # Unregister the service
-        self.__reg.unregister()
-        self.__reg = None
-
-        # Clean it up
-        self.__svc.clear()
-        self.__svc = None
-
-# Declare the Pelix activator
-activator = BundleActivator()
