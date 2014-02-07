@@ -19,6 +19,10 @@ from naoqi import ALProxy, ALModule
 # Local module
 import internals.constants as constants
 
+# Pelix
+from pelix.ipopo.decorators import ComponentFactory, Property, Instantiate, \
+    Provides, Validate, Invalidate
+
 # Standard library
 import logging
 
@@ -28,6 +32,10 @@ _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
 
+@ComponentFactory('nao-speech')
+@Provides(constants.SERVICE_SPEECH)
+@Property('_name', 'module.name', __name__.replace('.', '_'))
+@Instantiate('nao-speech')
 class NaoSpeechRecognition(ALModule):
     """
     Nao speech recognition service
@@ -39,13 +47,24 @@ class NaoSpeechRecognition(ALModule):
         :param name: ALModule name
         """
         # Store the name
-        self.__name = name
+        self._name = name
 
         # Initialize the module
-        ALModule.__init__(self, self.__name)
+        ALModule.__init__(self, self._name)
 
         # Listeners listener -> [words]
         self._listeners = {}
+
+        self._memory = None
+        self._recog = None
+
+
+    @Validate
+    def _validate(self, context):
+        constants.register_almodule(self._name, self)
+
+        # Initialize the module
+        ALModule.__init__(self, self._name)
 
         # Get the "memory" proxy, to register to callbacks
         self._memory = ALProxy("ALMemory")
@@ -53,6 +72,12 @@ class NaoSpeechRecognition(ALModule):
         # Create the proxy
         self._recog = ALProxy("ALSpeechRecognition")
         self._recog.setLanguage("French")
+
+
+    @Invalidate
+    def _invalidate(self, context):
+        constants.unregister_almodule(self._name)
+        self._memory = None
 
 
     def clear(self):
@@ -75,7 +100,7 @@ class NaoSpeechRecognition(ALModule):
         Unsubscribe from events
         """
         try:
-            self._memory.unsubscribeToEvent("WordRecognized", self.__name)
+            self._memory.unsubscribeToEvent("WordRecognized", self._name)
 
         except:
             # Ignore errors
@@ -111,7 +136,7 @@ class NaoSpeechRecognition(ALModule):
 
         # Subscribe the word recognition event
         self._memory.subscribeToEvent("WordRecognized",
-                                      self.__name,
+                                      self._name,
                                       "on_word_recognized")
 
 
@@ -137,52 +162,3 @@ class NaoSpeechRecognition(ALModule):
             except Exception as ex:
                 # Something went wrong
                 _logger.exception("Error calling word listener: %s", ex)
-
-#-------------------------------------------------------------------------------
-
-class BundleActivator(object):
-    """
-    Bundle activator, for Pelix
-    """
-    def __init__(self):
-        """
-        Sets up members
-        """
-        # Service registration
-        self.__reg = None
-
-        # Service
-        self.__svc = None
-
-        # ALModule name
-        self.__name = __name__.replace('.', '_')
-
-
-    def start(self, context):
-        """
-        Registers the service
-        """
-        # Prepare the service
-        self.__svc = NaoSpeechRecognition(self.__name)
-        constants.register_almodule(self.__name, self.__svc)
-
-        # Register it
-        self.__reg = context.register_service(constants.SERVICE_SPEECH,
-                                              self.__svc, {})
-
-
-    def stop(self, context):
-        """
-        Bundle stopped: unregister the service
-        """
-        # Unregister the service
-        self.__reg.unregister()
-        self.__reg = None
-
-        # Clean it up
-        constants.unregister_almodule(self.__name)
-        self.__svc.clear()
-        self.__svc = None
-
-# Declare the Pelix activator
-activator = BundleActivator()
