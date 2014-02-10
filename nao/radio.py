@@ -74,15 +74,15 @@ class RadioMqttControll(object):
         self._mqtt.publish("/nao/openhab/radio", str(value))
 
 
-    def word_recognized(self, filtered_words, all_words):
+    def word_recognized(self, word, all_words):
         """
         A word has been recognized
 
-        :param filtered_words: The recognized words we're looking for
+        :param word: The best-match word
         :param all_words: All the words that have been recognized
         """
         # TODO: Add a threshold to handle the word only if possible
-        self.handle_order(filtered_words[0])
+        self.handle_order(word[0])
 
 
     @Validate

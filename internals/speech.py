@@ -44,14 +44,12 @@ class NaoSpeechRecognition(ALModule):
     """
     Nao speech recognition service
     """
-    def __init__(self, name):
+    def __init__(self):
         """
         Sets up members
-
-        :param name: ALModule name
         """
-        # Store the name
-        self._name = name
+        # Component properties
+        self._name = None
         self._events_topics = None
 
         # Injected TTS
@@ -151,6 +149,7 @@ class NaoSpeechRecognition(ALModule):
         :param words: Words recognized by the listener
         """
         self._listeners[listener] = words
+        _logger.info("Adding words: %s (%s)", words, type(words).__name__)
 
 
     def remove_listener(self, listener):
@@ -168,7 +167,11 @@ class NaoSpeechRecognition(ALModule):
         Starts the recognition
         """
         # Start the speech recognition
-        self._recog.setVocabulary(list(set(self._listeners.values())), True)
+        words = set()
+        for listener_words in self._listeners.values():
+            words.update(listener_words)
+
+        self._recog.setVocabulary(list(words), True)
 
         # Pause the TTS service, if any
         if self._tts is not None:
@@ -187,16 +190,21 @@ class NaoSpeechRecognition(ALModule):
         # Stop recognizing speech
         self.__unsubscribe()
 
+        _logger.debug("Recognized: %s", raw_words)
+
+        # Get the first recognized word
+        word = raw_words[0]
+        _logger.debug("Using word: %s", word)
+
         # Call listeners
         for listener, listener_words in self._listeners.items():
             # Compute recognized words
-            sub_words = [word for word in raw_words if word in listener_words]
-
-            if sub_words:
-                # Notify the listener only if some its words have been heard
+            if word in listener_words:
+                # Notify the listener only if it is one of its words that
+                # have been heard
                 try:
                     # Call the listener
-                    listener.word_recognized(sub_words, raw_words[:])
+                    listener.word_recognized(word, raw_words[:])
 
                 except Exception as ex:
                     # Something went wrong

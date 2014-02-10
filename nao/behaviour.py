@@ -129,16 +129,15 @@ class NaoBehaviour(object):
             _logger.info("Behaviour %s is not running", behaviour)
 
 
-    def word_recognized(self, filtered_words, all_words):
+    def word_recognized(self, word, all_words):
         """
         A word has been recognized
 
-        :param filtered_words: The recognized words we're looking for
+        :param word: The best-match word
         :param all_words: All the words that have been recognized
         """
         # TODO: Add a threshold to handle the word only if possible
-        self.launch_behaviour(BEHAVIOURS_MAP.get(filtered_words[0],
-                                                 DEFAULT_BEHAVIOUR))
+        self.launch_behaviour(BEHAVIOURS_MAP.get(word, DEFAULT_BEHAVIOUR))
 
 
     @Validate
@@ -154,10 +153,10 @@ class NaoBehaviour(object):
         motion.setStiffnesses("Body", 1.0)
 
         # Print available behaviours
-        self.getBehaviors(self._manager)
+        self.get_behaviours()
 
         # Go in neutral mode
-        self.launchBehavior(self._manager, DEFAULT_BEHAVIOUR)
+        self.launch_behaviour(DEFAULT_BEHAVIOUR)
 
         # Register to some words
         self._speech.add_listener(self, list(BEHAVIOURS_MAP.keys()))

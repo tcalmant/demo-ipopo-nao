@@ -31,7 +31,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-TOUCH_EVENTS_MAP = {  # Head
+TOUCH_event_MAP = {  # Head
                     'FrontTactilTouched': 'front',
                     'MiddleTactilTouched': 'middle',
                     'RearTactilTouched': 'rear',
@@ -60,7 +60,7 @@ class NaoTouch(ALModule):
         :param name: ALModule name
         """
         # Injected service
-        self._events = None
+        self._event = None
 
         # Name property
         self._name = None
@@ -84,7 +84,7 @@ class NaoTouch(ALModule):
         self._memory = ALProxy("ALMemory")
 
         # Register to button events
-        for event in TOUCH_EVENTS_MAP:
+        for event in TOUCH_event_MAP:
             self._memory.subscribeToEvent(event, self._name,
                                           self.on_touch_sensed.__name__)
 
@@ -95,7 +95,7 @@ class NaoTouch(ALModule):
         Component invalidated
         """
         # Unregister from button events
-        for event in TOUCH_EVENTS_MAP:
+        for event in TOUCH_event_MAP:
             self._memory.unsubscribeToEvent(event, self._name)
 
         # Unregister the global
@@ -117,7 +117,7 @@ class NaoTouch(ALModule):
 
         try:
             # Get the local name
-            event_name = TOUCH_EVENTS_MAP[event]
+            event_name = TOUCH_event_MAP[event]
 
         except KeyError:
             # Unknown name, ignore
@@ -131,6 +131,6 @@ class NaoTouch(ALModule):
             event_type = "release"
 
         # Send the event
-        self._events.send('/nao/touch/{0}/{1}'.format(event_name, event_type),
-                          {'event': event, 'value': value,
-                           'name': event_name, 'type': event_type})
+        self._event.send('/nao/touch/{0}/{1}'.format(event_name, event_type),
+                         {'event': event, 'value': value,
+                          'name': event_name, 'type': event_type})

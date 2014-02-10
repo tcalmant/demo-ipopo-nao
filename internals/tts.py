@@ -20,7 +20,7 @@ from naoqi import ALProxy
 import internals.constants as constants
 
 # Pelix
-from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides,\
+from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides, \
     Validate, Invalidate
 
 # Standard library
@@ -47,11 +47,11 @@ class NaoTTS(object):
         self._tts = None
 
         # Authorization to speak
-        self._pause_speak = threading.Event()
+        self._can_speak = threading.Event()
         self._can_speak.set()
         self.__speaking_lock = threading.Lock()
-    
-    
+
+
     @Validate
     def validate(self, context):
         """
@@ -71,7 +71,7 @@ class NaoTTS(object):
 
         # Unlock everything
         self._can_speak.set()
-        
+
 
     def say(self, sentence):
         """

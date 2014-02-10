@@ -140,15 +140,15 @@ class NaoStateTeller(object):
         self._tts.say(sentence)
 
 
-    def word_recognized(self, filtered_words, all_words):
+    def word_recognized(self, word, all_words):
         """
         A word has been recognized
 
-        :param filtered_words: The recognized words we're looking for
+        :param word: The best-match word
         :param all_words: All the words that have been recognized
         """
         # Execute the order
-        self.__orders[filtered_words[0]]()
+        self.__orders[word]()
 
 
     @Validate

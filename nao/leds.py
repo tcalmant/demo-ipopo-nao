@@ -13,6 +13,9 @@ __docformat__ = "restructuredtext en"
 
 #-------------------------------------------------------------------------------
 
+# Nao SDK
+from naoqi import ALProxy
+
 # Nao Internals
 import internals.constants
 
@@ -78,15 +81,15 @@ class LedsSpeechControll(object):
         self._leds.fadeRGB('AllLeds', COLOR_MAP.get(color, DEFAULT_COLOR), 1.0)
 
 
-    def word_recognized(self, filtered_words, all_words):
+    def word_recognized(self, word, all_words):
         """
         A word has been recognized
 
-        :param filtered_words: The recognized words we're looking for
+        :param word: The best-match word
         :param all_words: All the words that have been recognized
         """
         # TODO: Add a threshold to handle the word only if possible
-        self.change_led(filtered_words[0])
+        self.change_led(word)
 
 
     @Validate
@@ -94,6 +97,9 @@ class LedsSpeechControll(object):
         """
         Component validated
         """
+        # Prepare the LED proxy
+        self._leds = ALProxy('ALLeds')
+
         # Register to some words
         self._speech.add_listener(self, list(COLOR_MAP.keys()))
 
@@ -105,3 +111,6 @@ class LedsSpeechControll(object):
         """
         # Unregister from speech recognition
         self._speech.remove_listener(self)
+
+        # Clean up
+        self._leds = None

@@ -72,7 +72,7 @@ def main(pip, pport):
 
                                   # Nao Demo
                                   'nao.shell',
-                                  'nao.behaviours',
+                                  'nao.behaviour',
                                   'nao.hue',
                                   'nao.leds',
                                   'nao.radio',
