@@ -67,6 +67,7 @@ def main(pip, pport):
 
                                   # Nao Internals
                                   'internals.speech',
+                                  'internals.touch',
                                   'internals.tts',
 
                                   # Nao Demo
@@ -75,8 +76,7 @@ def main(pip, pport):
                                   'nao.hue',
                                   'nao.leds',
                                   'nao.radio',
-                                  'nao.teller',
-                                  'nao.touch'))
+                                  'nao.teller'))
 
     # Start the framework
     framework.start()
