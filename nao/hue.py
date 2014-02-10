@@ -94,13 +94,15 @@ class HueMqttControll(object):
         :param lamp: Lamp ID
         :param color: String color (blue, bleu, ...)
         """
+        # Make Nao move
+        if lamp == 1:
+            self._behaviour.launch_behaviour('show_left')
+        elif lamp == 2:
+            self._behaviour.launch_behaviour('show_right')
+
+        # Send the order
         color_value = COLOR_MAP.get(color.lower(), DEFAULT_COLOR)
         self._mqtt.publish(self._make_topic(lamp, "color"), str(color_value))
-
-        if lamp == 1:
-            self._behaviour.launch_behaviour('show_left', True)
-        elif lamp == 2:
-            self._behaviour.launch_behaviour('show_right', True)
 
 
     def percent(self, lamp, value):
