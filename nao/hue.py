@@ -18,7 +18,7 @@ import internals.constants
 
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
-    Instantiate
+    Instantiate, Property
 import pelix.services
 
 # Standard library
@@ -53,9 +53,10 @@ DEFAULT_COLOR = COLOR_MAP['blue']
 @ComponentFactory('hue-control-mqtt')
 @Provides('nao.hue')
 @Provides(pelix.services.SERVICE_EVENT_HANDLER)
-@Requires('_tts', constants.SERVICE_TTS, optional=True)
+@Requires('_tts', internals.constants.SERVICE_TTS, optional=True)
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
+@Property('_events_topics', pelix.services.PROP_EVENT_TOPICS, ['/nao/touch/*'])
 @Instantiate('hue-control-mqtt')
 class HueMqttControll(object):
     """
@@ -69,6 +70,9 @@ class HueMqttControll(object):
         self._mqtt = None
         self._speech = None
         self._tts = None
+
+        # Property
+        self._events_topics = None
 
 
     def _make_topic(self, lamp, action):
@@ -114,24 +118,25 @@ class HueMqttControll(object):
         :param topic: Event topic
         :param properties: Event properties
         """
-        # Check the button
-        button = properties['name']
-        if button == 'front':
-            lamp = 1
+        # Only when button is released
+        pressed = bool(properties['value'])
+        if not pressed:
+            # Check the button
+            button = properties['name']
+            if button == 'front':
+                lamp = 1
+            elif button == 'rear':
+                lamp = 2
+            else:
+                return
 
-        elif button == 'rear':
-            lamp = 2
+            if self._tts is not None:
+                # Tell the user we're ready
+                self._tts.say('Je suis prêt à changer de couleur')
 
-        else:
-            return
+            # Recognize the color
+            word = self._speech.simple_recognize(list(COLOR_MAP.keys()))
 
-        if self._tts is not None:
-            # Tell the user we're ready
-            self._tts.say('Je suis prêt à changer de couleur')
-
-        # Recognize the color
-        word = self._speech.single_recognize(list(COLOR_MAP.keys()))
-
-        # Change the color
-        self.color(lamp, word)
+            # Change the color
+            self.color(lamp, word)
 
