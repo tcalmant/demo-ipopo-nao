@@ -49,7 +49,7 @@ class NaoSpeechRecognition(ALModule):
         """
         # Store the name
         self._name = name
-        
+
         # Injected TTS
         self._tts = None
 
@@ -90,7 +90,7 @@ class NaoSpeechRecognition(ALModule):
 
         # Unsubscribe from the speech recognition
         self.__unsubscribe()
-        
+
         # Unregister the module
         constants.unregister_almodule(self._name)
 
@@ -109,7 +109,7 @@ class NaoSpeechRecognition(ALModule):
         except:
             # Ignore errors
             _logger.debug("Error unsubscribing speech recognition")
-        
+
         finally:
             # In any case, resume the TTS service
             if self._tts is not None:
@@ -142,7 +142,7 @@ class NaoSpeechRecognition(ALModule):
         """
         # Start the speech recognition
         self._recog.setVocabulary(list(set(self._listeners.values())), True)
-        
+
         # Pause the TTS service, if any
         if self._tts is not None:
             self._tts.pause()
@@ -168,10 +168,12 @@ class NaoSpeechRecognition(ALModule):
             # Compute recognized words
             sub_words = [word for word in raw_words if word in listener_words]
 
-            try:
-                # Call the listener
-                listener.word_recognized(sub_words, raw_words[:])
+            if sub_words:
+                # Notify the listener only if some its words have been heard
+                try:
+                    # Call the listener
+                    listener.word_recognized(sub_words, raw_words[:])
 
-            except Exception as ex:
-                # Something went wrong
-                _logger.exception("Error calling word listener: %s", ex)
+                except Exception as ex:
+                    # Something went wrong
+                    _logger.exception("Error calling word listener: %s", ex)
