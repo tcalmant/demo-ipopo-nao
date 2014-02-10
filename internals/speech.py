@@ -65,7 +65,8 @@ class NaoSpeechRecognition(ALModule):
 
         # Flags
         self.__lock = threading.RLock()
-        self._in_recog = False
+        self._can_recog = threading.Event()
+        self._single_recognized = threading.Event()
 
 
     @Validate
@@ -94,6 +95,9 @@ class NaoSpeechRecognition(ALModule):
         self._recog = ALProxy("ALSpeechRecognition")
         self._recog.setLanguage("French")
 
+        # We're ready
+        self._can_recog.set()
+
         _logger.debug("Speech ready")
 
 
@@ -120,8 +124,6 @@ class NaoSpeechRecognition(ALModule):
         """
         Unsubscribe from events
         """
-        self._in_recog = False
-
         try:
             self._memory.unsubscribeToEvent("WordRecognized", self._name)
 
@@ -134,6 +136,9 @@ class NaoSpeechRecognition(ALModule):
             if self._tts is not None:
                 self._tts.resume()
 
+            # Authorize again
+            self._can_recog.set()
+
 
     def handle_event(self, topic, properties):
         """
@@ -142,7 +147,7 @@ class NaoSpeechRecognition(ALModule):
         :param topic: Event topic
         :param properties: Event properties
         """
-        if self._in_recog:
+        if not self._can_recog.is_set():
             # Already recognizing
             _logger.debug('Already recognizing')
             return
@@ -191,7 +196,7 @@ class NaoSpeechRecognition(ALModule):
 
         :param words: The vocabulary to use (optional)
         """
-        self._in_recog = True
+        self._can_recog.clear()
 
         # Start the speech recognition
         if not words:
@@ -209,6 +214,49 @@ class NaoSpeechRecognition(ALModule):
         self._memory.subscribeToEvent("WordRecognized",
                                       self._name,
                                       self.on_word_recognized.__name__)
+
+
+    def simple_recognize(self, words):
+        """
+        One-shot recognition
+        """
+        # Wait to be able to recognize
+        self._can_recog.wait()
+        self._can_recog.clear()
+
+        # Prepare the recognition
+        self._recog.setVocabulary(list(words), True)
+        self._single_recognized.clear()
+
+        # Pause the TTS service, if any
+        if self._tts is not None:
+            self._tts.pause()
+
+        # Subscribe the word recognition event
+        self._memory.subscribeToEvent("WordRecognized",
+                                      self._name,
+                                      self.on_single_recognized.__name__)
+
+        # Wait for the word to be recognized
+        self._single_recognized.wait()
+
+        # Store the word
+        result = self._single_result
+
+        # Return the found word
+        return result
+
+
+    def on_single_recognized(self, event, raw_words, identifier):
+        """
+        A word has been recognized
+        """
+        # Set up the "single" result
+        self._single_result = raw_words[0]
+        self._single_recognized.set()
+
+        # Prepare next run
+        self.__unsubscribe()
 
 
     def on_word_recognized(self, event, raw_words, identifier):
