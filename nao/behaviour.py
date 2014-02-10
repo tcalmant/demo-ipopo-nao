@@ -98,7 +98,9 @@ class NaoBehaviour(object):
                     self._manager.post.runBehavior(behaviour)
 
                 else:
+                    # Clean up after the blocking code
                     self._manager.runBehavior(behaviour)
+                    self._manager.stopBehavior(behaviour)
 
             else:
                 _logger.warning("A behaviour is already running")
