@@ -21,7 +21,7 @@ import internals.constants as constants
 
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Property, Instantiate, \
-    Provides, Validate, Invalidate
+    Provides, Requires, Validate, Invalidate
 
 # Standard library
 import logging
@@ -34,6 +34,7 @@ _logger = logging.getLogger(__name__)
 
 @ComponentFactory('nao-speech')
 @Provides(constants.SERVICE_SPEECH)
+@Requires('_tts', constants.SERVICE_TTS, optional=True)
 @Property('_name', 'module.name', __name__.replace('.', '_'))
 @Instantiate('nao-speech')
 class NaoSpeechRecognition(ALModule):
@@ -48,13 +49,14 @@ class NaoSpeechRecognition(ALModule):
         """
         # Store the name
         self._name = name
-
-        # Initialize the module
-        ALModule.__init__(self, self._name)
+        
+        # Injected TTS
+        self._tts = None
 
         # Listeners listener -> [words]
         self._listeners = {}
 
+        # ALProxies
         self._memory = None
         self._recog = None
 
@@ -107,6 +109,11 @@ class NaoSpeechRecognition(ALModule):
         except:
             # Ignore errors
             _logger.debug("Error unsubscribing speech recognition")
+        
+        finally:
+            # In any case, resume the TTS service
+            if self._tts is not None:
+                self._tts.resume()
 
 
     def add_listener(self, listener, words):
@@ -135,6 +142,10 @@ class NaoSpeechRecognition(ALModule):
         """
         # Start the speech recognition
         self._recog.setVocabulary(list(set(self._listeners.values())), True)
+        
+        # Pause the TTS service, if any
+        if self._tts is not None:
+            self._tts.pause()
 
         # Subscribe the word recognition event
         self._memory.subscribeToEvent("WordRecognized",
