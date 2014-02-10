@@ -18,7 +18,7 @@ import internals.constants
 
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Property, \
-    Instantiate, Requires
+    Instantiate, Requires, Validate, Invalidate
 import pelix.services as services
 
 # Standard library
@@ -31,6 +31,7 @@ _logger = logging.getLogger(__name__)
 #-------------------------------------------------------------------------------
 
 @ComponentFactory('nao-teller')
+@Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_tts', internals.constants.SERVICE_TTS)
 @Provides('nao.teller')
 @Provides(services.SERVICE_MQTT_LISTENER)
@@ -47,8 +48,18 @@ class NaoStateTeller(object):
         # Properties
         self._topics = None
 
-        # Nao TTS service
+        # Nao services
+        self._speech = None
         self._tts = None
+
+        # Setup the map of orders
+        self.__orders = {'porte': self.say_door}
+
+        for name in ('meteo', 'météo'):
+            self.__orders[name] = self.say_weather
+
+        for name in ('température', 'intérieur'):
+            self.__orders[name] = self.say_temperature
 
         # Last known states
         self._door_state = None
@@ -104,7 +115,8 @@ class NaoStateTeller(object):
         """
         payload = self._last_temperature
         if payload is None:
-            sentence = "Je n'ai pas d'information sur la température intérieure."
+            sentence = "Je n'ai pas d'information sur la température " \
+                       "intérieure."
         else:
             sentence = "La température intérieure est de {0} degrés celsius" \
                        .format(payload)
@@ -119,9 +131,39 @@ class NaoStateTeller(object):
         payload = self._last_weather
 
         if payload is None:
-            sentence = "Je n'ai pas d'information sur la température extérieure."
+            sentence = "Je n'ai pas d'information sur la température " \
+                       "extérieure."
         else:
             sentence = "La température extérieure est de {0} degrés celsius" \
                         .format(payload)
 
         self._tts.say(sentence)
+
+
+    def word_recognized(self, filtered_words, all_words):
+        """
+        A word has been recognized
+
+        :param filtered_words: The recognized words we're looking for
+        :param all_words: All the words that have been recognized
+        """
+        # Execute the order
+        self.__orders[filtered_words[0]]()
+
+
+    @Validate
+    def _validate(self, context):
+        """
+        Component validated
+        """
+        # Register to some words
+        self._speech.add_listener(self, list(self.__orders.keys()))
+
+
+    @Invalidate
+    def _invalidate(self, context):
+        """
+        Component invalidated
+        """
+        # Unregister from speech recognition
+        self._speech.remove_listener(self)
