@@ -13,6 +13,9 @@ __docformat__ = "restructuredtext en"
 
 #-------------------------------------------------------------------------------
 
+# Nao Internals
+import internals.constants
+
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Property, \
     Instantiate, Requires
@@ -28,7 +31,7 @@ _logger = logging.getLogger(__name__)
 #-------------------------------------------------------------------------------
 
 @ComponentFactory('nao-teller')
-@Requires('_nao', 'nao.core')
+@Requires('_tts', internals.constants.SERVICE_TTS)
 @Provides('nao.teller')
 @Provides(services.SERVICE_MQTT_LISTENER)
 @Property('_topics', services.PROP_MQTT_TOPICS, '/openhab/nao/+')
@@ -44,8 +47,8 @@ class NaoStateTeller(object):
         # Properties
         self._topics = None
 
-        # Nao core service
-        self._nao = None
+        # Nao TTS service
+        self._tts = None
 
         # Last known states
         self._door_state = None
@@ -77,7 +80,7 @@ class NaoStateTeller(object):
         """
         Says something
         """
-        self._nao.say(sentence)
+        self._tts.say(sentence)
 
 
     def say_door(self):
@@ -92,7 +95,7 @@ class NaoStateTeller(object):
         else:
             state = "dans un état que je ne connais pas"
 
-        self._nao.say("La porte est {0}".format(state))
+        self._tts.say("La porte est {0}".format(state))
 
 
     def say_temperature(self):
@@ -106,7 +109,7 @@ class NaoStateTeller(object):
             sentence = "La température intérieure est de {0} degrés celsius" \
                        .format(payload)
 
-        self._nao.say(sentence)
+        self._tts.say(sentence)
 
 
     def say_weather(self):
@@ -121,4 +124,4 @@ class NaoStateTeller(object):
             sentence = "La température extérieure est de {0} degrés celsius" \
                         .format(payload)
 
-        self._nao.say(sentence)
+        self._tts.say(sentence)

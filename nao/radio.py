@@ -13,9 +13,12 @@ __docformat__ = "restructuredtext en"
 
 #-------------------------------------------------------------------------------
 
+# Nao Internals
+import internals.constants
+
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
-    Instantiate
+    Instantiate, Validate, Invalidate
 import pelix.services
 
 # Standard library
@@ -31,23 +34,23 @@ RADIO_MAP = {'off': 0,
              'radio': 1,
              'change': 2,
              }
-
 """
 OpenHAB MQTT radio map
 """
 
 DEFAULT_RADIO = RADIO_MAP['radio']
-""" Default Radion : radio (premiere chaine station ) """
+""" Default radio: radio (first radio channel found) """
 
 #-------------------------------------------------------------------------------
 
 @ComponentFactory('radio-control-mqtt')
 @Provides('nao.radio')
+@Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Instantiate('radio-control-mqtt')
 class RadioMqttControll(object):
     """
-    Provides a shell command to publish messages
+    Controls the radio on OpenHAB
     """
     def __init__(self):
         """
@@ -55,21 +58,46 @@ class RadioMqttControll(object):
         """
         # Injected service
         self._mqtt = None
+        self._speech = None
 
 
-    def _make_topic(self):
+    def handle_order(self, order):
         """
-        Prepares the MQTT topic for the given action
-                
-        :param station_number: Action on the radio: number of the station
-        """
-        return "/nao/openhab/radio"
+        Changes the radio station or stops the radio
 
-    def station(self, station_number):
+        :param order: The order to send to OpenHAB (off, radio or change)
         """
-        Changes the radio station
- 
-        :param value: station number where 0 = off
+        # Get the order
+        value = RADIO_MAP.get(order, DEFAULT_RADIO)
+
+        # Send the order using MQTT
+        self._mqtt.publish("/nao/openhab/radio", str(value))
+
+
+    def word_recognized(self, filtered_words, all_words):
         """
-        value = RADIO_MAP.get(station_number.lower(), DEFAULT_RADIO)
-        self._mqtt.publish(self._make_topic(), str(value))
+        A word has been recognized
+
+        :param filtered_words: The recognized words we're looking for
+        :param all_words: All the words that have been recognized
+        """
+        # TODO: Add a threshold to handle the word only if possible
+        self.handle_order(filtered_words[0])
+
+
+    @Validate
+    def _validate(self, context):
+        """
+        Component validated
+        """
+        # Register to some words
+        self._speech.add_listener(self, list(RADIO_MAP.keys()))
+
+
+    @Invalidate
+    def _invalidate(self, context):
+        """
+        Component invalidated
+        """
+        # Unregister from speech recognition
+        self._speech.remove_listener(self)
