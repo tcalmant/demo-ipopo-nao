@@ -19,6 +19,8 @@ sys.path.insert(0, "/home/nao/python-libs")
 
 # Pelix
 from pelix.framework import create_framework
+from pelix.ipopo.constants import use_ipopo
+import pelix.services
 
 #-------------------------------------------------------------------------------
 
@@ -56,6 +58,10 @@ def main(pip, pport):
                                   'pelix.services.configadmin',
                                   'pelix.shell.configadmin',
 
+                                  # EventAdmin,
+                                  'pelix.services.eventadmin',
+                                  'pelix.shell.eventadmin',
+
                                   # MQTT
                                   'pelix.services.mqtt',
 
@@ -70,9 +76,15 @@ def main(pip, pport):
                                   'nao.leds',
                                   'nao.radio',
                                   'nao.teller',
-                                  'nao.touch_test'))
+                                  'nao.touch'))
 
+    # Start the framework
     framework.start()
+
+    # Instantiate EventAdmin
+    with use_ipopo(framework.get_bundle_context()) as ipopo:
+        ipopo.instantiate(pelix.services.FACTORY_EVENT_ADMIN, 'event-admin', {})
+
     try:
         # Wait for the framework to stop
         framework.wait_for_stop()
