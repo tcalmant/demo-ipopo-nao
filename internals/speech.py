@@ -22,6 +22,7 @@ import internals.constants as constants
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Property, Instantiate, \
     Provides, Requires, Validate, Invalidate
+import pelix.services
 
 # Standard library
 import logging
@@ -34,8 +35,10 @@ _logger = logging.getLogger(__name__)
 
 @ComponentFactory('nao-speech')
 @Provides(constants.SERVICE_SPEECH)
+@Provides(pelix.services.SERVICE_EVENT_HANDLER)
 @Requires('_tts', constants.SERVICE_TTS, optional=True)
 @Property('_name', 'module.name', __name__.replace('.', '_'))
+@Property('_events_topics', pelix.services.PROP_EVENT_TOPICS, ['/nao/touch/*'])
 @Instantiate('nao-speech')
 class NaoSpeechRecognition(ALModule):
     """
@@ -49,6 +52,7 @@ class NaoSpeechRecognition(ALModule):
         """
         # Store the name
         self._name = name
+        self._events_topics = None
 
         # Injected TTS
         self._tts = None
@@ -116,6 +120,29 @@ class NaoSpeechRecognition(ALModule):
                 self._tts.resume()
 
 
+    def handle_event(self, topic, properties):
+        """
+        An EventAdmin event has been received
+
+        :param topic: Event topic
+        :param properties: Event properties
+        """
+        button = properties['name']
+        if button not in ('front', 'middle'):
+            # Only handle head front and middle buttons
+            return
+
+        pressed = bool(properties['value'])
+        if pressed:
+            # Button pressed/touched: start recognition
+            if self._tts is not None:
+                # Tell the user we're ready
+                self._tts.say('Je vous écoute')
+
+            # Start recognition
+            self.recognize()
+
+
     def add_listener(self, listener, words):
         """
         Adds a speech listener
@@ -136,7 +163,7 @@ class NaoSpeechRecognition(ALModule):
         del self._listeners[listener]
 
 
-    def recognize(self, call_back):
+    def recognize(self):
         """
         Starts the recognition
         """
@@ -150,16 +177,13 @@ class NaoSpeechRecognition(ALModule):
         # Subscribe the word recognition event
         self._memory.subscribeToEvent("WordRecognized",
                                       self._name,
-                                      "on_word_recognized")
+                                      self.on_word_recognized.__name__)
 
 
-    def on_word_recognized(self, *args):
+    def on_word_recognized(self, event, raw_words, identifier):
         """
         A word has been recognized
         """
-        # Get what has been heard
-        raw_words = self._memory.getData("WordRecognized")
-
         # Stop recognizing speech
         self.__unsubscribe()
 
