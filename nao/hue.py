@@ -18,7 +18,7 @@ import internals.constants
 
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
-    Instantiate, Validate, Invalidate
+    Instantiate
 import pelix.services
 
 # Standard library
@@ -52,6 +52,8 @@ DEFAULT_COLOR = COLOR_MAP['blue']
 
 @ComponentFactory('hue-control-mqtt')
 @Provides('nao.hue')
+@Provides(pelix.services.SERVICE_EVENT_HANDLER)
+@Requires('_tts', constants.SERVICE_TTS, optional=True)
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Instantiate('hue-control-mqtt')
@@ -66,6 +68,7 @@ class HueMqttControll(object):
         # Injected service
         self._mqtt = None
         self._speech = None
+        self._tts = None
 
 
     def _make_topic(self, lamp, action):
@@ -104,30 +107,31 @@ class HueMqttControll(object):
         self._mqtt.publish(self._make_topic(lamp, "percent"), str(value))
 
 
-    def word_recognized(self, word, all_words):
+    def handle_event(self, topic, properties):
         """
-        A word has been recognized
+        An EventAdmin event has been received
 
-        :param word: The best-match word
-        :param all_words: All the words that have been recognized
+        :param topic: Event topic
+        :param properties: Event properties
         """
-        # TODO: Add a threshold to handle the word only if possible
-        self.color(1, word)
+        # Check the button
+        button = properties['name']
+        if button == 'front':
+            lamp = 1
 
+        elif button == 'rear':
+            lamp = 2
 
-    @Validate
-    def _validate(self, context):
-        """
-        Component validated
-        """
-        # Register to some words
-        self._speech.add_listener(self, list(COLOR_MAP.keys()))
+        else:
+            return
 
+        if self._tts is not None:
+            # Tell the user we're ready
+            self._tts.say('Je suis prêt à changer de couleur')
 
-    @Invalidate
-    def _invalidate(self, context):
-        """
-        Component invalidated
-        """
-        # Unregister from speech recognition
-        self._speech.remove_listener(self)
+        # Recognize the color
+        word = self._speech.single_recognize(list(COLOR_MAP.keys()))
+
+        # Change the color
+        self.color(lamp, word)
+
