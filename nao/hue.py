@@ -56,6 +56,7 @@ DEFAULT_COLOR = COLOR_MAP['blue']
 @Requires('_tts', internals.constants.SERVICE_TTS, optional=True)
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
+@Requires('_leds', 'nao.leds')
 @Property('_events_topics', pelix.services.PROP_EVENT_TOPICS, ['/nao/touch/*'])
 @Instantiate('hue-control-mqtt')
 class HueMqttControll(object):
@@ -140,3 +141,5 @@ class HueMqttControll(object):
             # Change the color
             self.color(lamp, word)
 
+            # Change the LEDs (we have the same color names)
+            self._leds.change_leds(word)
