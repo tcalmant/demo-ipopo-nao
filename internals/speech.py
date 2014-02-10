@@ -186,17 +186,20 @@ class NaoSpeechRecognition(ALModule):
         del self._listeners[listener]
 
 
-    def recognize(self):
+    def recognize(self, words=None):
         """
         Starts the recognition
+
+        :param words: The vocabulary to use (optional)
         """
         with self.__lock:
             self._in_recog = True
 
         # Start the speech recognition
-        words = set()
-        for listener_words in self._listeners.values():
-            words.update(listener_words)
+        if not words:
+            words = set()
+            for listener_words in self._listeners.values():
+                words.update(listener_words)
 
         self._recog.setVocabulary(list(words), True)
 
