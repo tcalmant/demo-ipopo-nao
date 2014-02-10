@@ -82,7 +82,7 @@ class RadioMqttControll(object):
         :param all_words: All the words that have been recognized
         """
         # TODO: Add a threshold to handle the word only if possible
-        self.handle_order(word[0])
+        self.handle_order(word)
 
 
     @Validate
