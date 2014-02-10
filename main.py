@@ -80,6 +80,7 @@ def main(pip, pport):
                                   # Shell
                                   'shell.behaviour',
                                   'shell.hue',
+                                  'shell.speech',
                                   'shell.teller'
                                   ))
 
