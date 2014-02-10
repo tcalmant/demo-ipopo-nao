@@ -120,8 +120,7 @@ class NaoSpeechRecognition(ALModule):
         """
         Unsubscribe from events
         """
-        with self.__lock:
-            self._in_recog = False
+        self._in_recog = False
 
         try:
             self._memory.unsubscribeToEvent("WordRecognized", self._name)
@@ -143,12 +142,12 @@ class NaoSpeechRecognition(ALModule):
         :param topic: Event topic
         :param properties: Event properties
         """
-        with self.__lock:
-            if self._in_recog:
-                # Already recognizing
-                _logger.debug('Already recognizing')
-                return
+        if self._in_recog:
+            # Already recognizing
+            _logger.debug('Already recognizing')
+            return
 
+        with self.__lock:
             button = properties['name']
             if button not in ('front', 'middle'):
                 # Only handle head front and middle buttons
@@ -192,8 +191,7 @@ class NaoSpeechRecognition(ALModule):
 
         :param words: The vocabulary to use (optional)
         """
-        with self.__lock:
-            self._in_recog = True
+        self._in_recog = True
 
         # Start the speech recognition
         if not words:
