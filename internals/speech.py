@@ -39,7 +39,8 @@ _logger = logging.getLogger(__name__)
 @Provides(pelix.services.SERVICE_EVENT_HANDLER)
 @Requires('_tts', constants.SERVICE_TTS, optional=True)
 @Property('_name', 'module.name', __name__.replace('.', '_'))
-@Property('_events_topics', pelix.services.PROP_EVENT_TOPICS, ['/nao/touch/*'])
+@Property('_events_topics', pelix.services.PROP_EVENT_TOPICS,
+          ['/nao/touch/middle/*'])
 @Instantiate('nao-speech')
 class NaoSpeechRecognition(ALModule):
     """
@@ -153,11 +154,6 @@ class NaoSpeechRecognition(ALModule):
             return
 
         with self.__lock:
-            button = properties['name']
-            if button != 'middle':
-                # Only handle head front and middle buttons
-                return
-
             pressed = bool(properties['value'])
             if pressed:
                 # Button pressed/touched: start recognition
