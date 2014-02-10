@@ -55,6 +55,7 @@ DEFAULT_COLOR = COLOR_MAP['blue']
 @Provides(pelix.services.SERVICE_EVENT_HANDLER)
 @Requires('_tts', internals.constants.SERVICE_TTS, optional=True)
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
+@Requires('_behaviour', 'nao.behaviour')
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Property('_events_topics', pelix.services.PROP_EVENT_TOPICS, ['/nao/touch/*'])
 @Instantiate('hue-control-mqtt')
@@ -70,7 +71,7 @@ class HueMqttControll(object):
         self._mqtt = None
         self._speech = None
         self._tts = None
-
+        self._behaviour = None
         # Property
         self._events_topics = None
 
@@ -125,8 +126,10 @@ class HueMqttControll(object):
             button = properties['name']
             if button == 'front':
                 lamp = 1
+                self._behaviour.launchBehaviour('gauche')
             elif button == 'rear':
                 lamp = 2
+                self._behaviour.launchBehaviour('droite')
             else:
                 return
 
