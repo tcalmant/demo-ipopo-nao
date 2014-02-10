@@ -4,6 +4,8 @@ Nao-iPOPO Demonstration
 Nao's code of a demonstration project for the
 `Eclipse IoT Day Grenoble 2014 <https://wiki.eclipse.org/Eclipse_IoT_Day_Grenoble_2014>`_.
 
+Nao is a robot by `Aldebaran Robotics <http://www.aldebaran-robotics.com/>`_.
+
 This project is based on `iPOPO <https://ipopo.coderxpress.net>`_, an SOCM
 framework in Python, to wrap Nao API (ALModule, ALProxy, ...) into different
 components. 
