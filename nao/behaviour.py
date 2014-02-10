@@ -81,7 +81,7 @@ class NaoBehaviour(object):
             self._manager.getRunningBehaviors()
 
 
-    def launch_behaviour(self, behaviour):
+    def launch_behaviour(self, behaviour, blocking=False):
         """
         Launches the given behaviour, if possible
 
@@ -94,7 +94,11 @@ class NaoBehaviour(object):
                 # Launch behavior. This is a blocking call,
                 # use post if you do not want to wait for the behavior to
                 # finish.
-                self._manager.post.runBehavior(behaviour)
+                if not blocking:
+                    self._manager.post.runBehavior(behaviour)
+
+                else:
+                    self._manager.runBehavior(behaviour)
 
             else:
                 _logger.warning("A behaviour is already running")

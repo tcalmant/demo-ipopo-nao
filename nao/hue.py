@@ -97,6 +97,11 @@ class HueMqttControll(object):
         color_value = COLOR_MAP.get(color.lower(), DEFAULT_COLOR)
         self._mqtt.publish(self._make_topic(lamp, "color"), str(color_value))
 
+        if lamp == 1:
+            self._behaviour.launch_behaviour('show_left', True)
+        elif lamp == 2:
+            self._behaviour.launch_behaviour('show_right', True)
+
 
     def percent(self, lamp, value):
         """
@@ -127,10 +132,8 @@ class HueMqttControll(object):
             button = properties['name']
             if button == 'front':
                 lamp = 1
-                self._behaviour.launchBehaviour('gauche')
             elif button == 'rear':
                 lamp = 2
-                self._behaviour.launchBehaviour('droite')
             else:
                 return
 
