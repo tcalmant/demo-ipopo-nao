@@ -38,11 +38,10 @@ BEHAVIOURS_MAP = {'danse': 'dance_twist',
                   'gauche': 'show_left',
                   'bonjour': 'Hello',
                   'hello': 'Hello',
-                  'salut': 'Salute_1',
+                  'merci': 'Salute_1',
                   'navette': 'SpaceShuttle',
                   'applaudi': 'Applause_1',
-                  'pense': 'mentalist',
-                  'étire': 'strech',
+                  'étire': 'strech1',
                   'bravo': 'winner'}
 """
 Order -> Behaviour name association
