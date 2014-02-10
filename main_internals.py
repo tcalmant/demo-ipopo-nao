@@ -66,6 +66,7 @@ def main(pip, pport):
                                   # Nao Demo
                                   'nao.shell',
                                   'nao.hue',
+                                  'nao.leds',
                                   'nao.radio',
                                   'nao.teller',
                                   'nao.touch_test'))
