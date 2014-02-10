@@ -17,16 +17,17 @@ It uses MQTT to send and receive message to/from
 Information about this project will be available on the
 `wiki of iPOPO <https://ipopo.coderxpress.net/wiki/doku.php?id=contrib:eclipse_iot_2014>`_.
 
+
 Installation
 ************
 
-.. note:: All installation operation are done in the ``/home/nao`` folder
+All installation operation are done in the ``/home/nao`` folder
 
 iPOPO and its dependencies
 ==========================
 
-.. note:: We consider that no package installation tool is present on the robot,
-   else a simple ``pip install iPOPO paho-mqtt`` will be sufficient
+We consider that no package installation tool is present on the robot, else a
+simple ``pip install iPOPO paho-mqtt`` will be sufficient
 
 Preparation
 -----------
