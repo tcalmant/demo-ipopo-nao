@@ -26,6 +26,7 @@ import pelix.services
 
 # Standard library
 import logging
+import threading
 
 #-------------------------------------------------------------------------------
 
@@ -62,12 +63,18 @@ class NaoSpeechRecognition(ALModule):
         self._memory = None
         self._recog = None
 
+        # Flags
+        self.__lock = threading.RLock()
+        self._in_recog = False
+
 
     @Validate
     def _validate(self, context):
         """
         Component validated
         """
+        _logger.debug("Validating speech...")
+
         # Register the module as a global in __main__
         constants.register_almodule(self._name, self)
 
@@ -77,9 +84,17 @@ class NaoSpeechRecognition(ALModule):
         # Get the "memory" proxy, to register to callbacks
         self._memory = ALProxy("ALMemory")
 
+        # Just to be sure...
+        try:
+            self._memory.unsubscribeToEvent("WordRecognized", self._name)
+        except:
+            _logger.debug("Speech wasn't yet registered")
+
         # Create the proxy
         self._recog = ALProxy("ALSpeechRecognition")
         self._recog.setLanguage("French")
+
+        _logger.debug("Speech ready")
 
 
     @Invalidate
@@ -105,6 +120,9 @@ class NaoSpeechRecognition(ALModule):
         """
         Unsubscribe from events
         """
+        with self.__lock:
+            self._in_recog = False
+
         try:
             self._memory.unsubscribeToEvent("WordRecognized", self._name)
 
@@ -125,20 +143,26 @@ class NaoSpeechRecognition(ALModule):
         :param topic: Event topic
         :param properties: Event properties
         """
-        button = properties['name']
-        if button not in ('front', 'middle'):
-            # Only handle head front and middle buttons
-            return
+        with self.__lock:
+            if self._in_recog:
+                # Already recognizing
+                _logger.debug('Already recognizing')
+                return
 
-        pressed = bool(properties['value'])
-        if pressed:
-            # Button pressed/touched: start recognition
-            if self._tts is not None:
-                # Tell the user we're ready
-                self._tts.say('Je vous écoute')
+            button = properties['name']
+            if button not in ('front', 'middle'):
+                # Only handle head front and middle buttons
+                return
 
-            # Start recognition
-            self.recognize()
+            pressed = bool(properties['value'])
+            if pressed:
+                # Button pressed/touched: start recognition
+                if self._tts is not None:
+                    # Tell the user we're ready
+                    self._tts.say('Je vous écoute')
+
+                # Start recognition
+                self.recognize()
 
 
     def add_listener(self, listener, words):
@@ -166,6 +190,9 @@ class NaoSpeechRecognition(ALModule):
         """
         Starts the recognition
         """
+        with self.__lock:
+            self._in_recog = True
+
         # Start the speech recognition
         words = set()
         for listener_words in self._listeners.values():
