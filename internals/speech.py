@@ -154,7 +154,7 @@ class NaoSpeechRecognition(ALModule):
 
         with self.__lock:
             button = properties['name']
-            if button not in ('front', 'middle'):
+            if button != 'middle':
                 # Only handle head front and middle buttons
                 return
 
