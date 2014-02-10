@@ -85,7 +85,8 @@ class NaoTouch(ALModule):
 
         # Register to button events
         for event in TOUCH_EVENTS_MAP:
-            self._memory.subscribeToEvent(event, self._name, "onTouchSensed")
+            self._memory.subscribeToEvent(event, self._name,
+                                          self.on_touch_sensed.__name__)
 
 
     @Invalidate
@@ -104,7 +105,7 @@ class NaoTouch(ALModule):
         self._memory = None
 
 
-    def onTouchSensed(self, event, value, identifier):
+    def on_touch_sensed(self, event, value, identifier):
         """
         A touch button has been... touched
 
@@ -130,5 +131,6 @@ class NaoTouch(ALModule):
             event_type = "release"
 
         # Send the event
-        self._events.post('/nao/touch/{0}/{1}'.format(event_name, event_type),
-                          {'event': event, 'value': value})
+        self._events.send('/nao/touch/{0}/{1}'.format(event_name, event_type),
+                          {'event': event, 'value': value,
+                           'name': event_name, 'type': event_type})
