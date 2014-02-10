@@ -27,11 +27,10 @@ _logger = logging.getLogger(__name__)
 
 #-------------------------------------------------------------------------------
 
-@ComponentFactory('nao-shell')
+@ComponentFactory('nao-shell-hue')
 @Provides(pelix.shell.SHELL_COMMAND_SPEC)
 @Requires('_hue', 'nao.hue')
-@Requires('_teller', 'nao.teller')
-@Instantiate('nao-shell')
+@Instantiate('nao-shell-hue')
 class NaoShell(object):
     """
     Provides a shell command to publish messages
@@ -42,7 +41,6 @@ class NaoShell(object):
         """
         # Injected service
         self._hue = None
-        self._teller = None
 
 
     def get_namespace(self):
@@ -57,22 +55,19 @@ class NaoShell(object):
         Called by the shell service: returns the list of shell commands
         """
         return [('hue_color', self.lamp_color),
-                ('hue_percent', self.lamp_percent),
-                ('say', self.teller_say),
-                ('say_temperature', self.teller_temperature),
-                ('say_weather', self.teller_weather)]
+                ('hue_percent', self.lamp_percent)]
 
 
     def lamp_color(self, io_handler, lamp, color):
         """
-        Change color of Philipps Lamp
+        Change color of Philips Lamp
         """
         self._hue.color(lamp, color)
 
 
     def lamp_percent(self, io_handler, lamp, value):
         """
-        Change the power of Philipps Lamp (value: integer %)
+        Change the power of Philips Lamp (value: integer percentage)
         """
         try:
             value = int(value)
@@ -82,24 +77,3 @@ class NaoShell(object):
 
         else:
             self._hue.percent(lamp, value)
-
-
-    def teller_say(self, io_handler, *words):
-        """
-        Says something
-        """
-        self._teller.say(' '.join(words))
-
-
-    def teller_temperature(self, io_handler):
-        """
-        Says the last known value of the interior temperature
-        """
-        self._teller.say_temperature()
-
-
-    def teller_weather(self, io_handler):
-        """
-        Says the last known value of the exterior temperature
-        """
-        self._teller.say_weather()

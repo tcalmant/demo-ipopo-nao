@@ -71,12 +71,17 @@ def main(pip, pport):
                                   'internals.tts',
 
                                   # Nao Demo
-                                  'nao.shell',
                                   'nao.behaviour',
                                   'nao.hue',
                                   'nao.leds',
                                   'nao.radio',
-                                  'nao.teller'))
+                                  'nao.teller',
+
+                                  # Shell
+                                  'shell.behaviour',
+                                  'shell.hue',
+                                  'shell.teller'
+                                  ))
 
     # Start the framework
     framework.start()

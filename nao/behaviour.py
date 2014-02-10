@@ -77,17 +77,8 @@ class NaoBehaviour(object):
 
         :return: A tuple (list of known behaviours, list of running ones)
         """
-        # Get behaviours
-        known = self._manager.getInstalledBehaviors()
-        running = self._manager.getRunningBehaviors()
-
-        # TODO: make a shell command instead of logging
-        _logger.info("Known behaviours:\n%s",
-                     "\n".join("\t- {0}".format(name) for name in known))
-        _logger.info("Running behaviours:\n%s",
-                     "\n".join("\t- {0}".format(name) for name in running))
-
-        return known, running
+        return self._manager.getInstalledBehaviors(), \
+            self._manager.getRunningBehaviors()
 
 
     def launch_behaviour(self, behaviour):
