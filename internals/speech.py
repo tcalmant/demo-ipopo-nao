@@ -61,6 +61,10 @@ class NaoSpeechRecognition(ALModule):
 
     @Validate
     def _validate(self, context):
+        """
+        Component validated
+        """
+        # Register the module as a global in __main__
         constants.register_almodule(self._name, self)
 
         # Initialize the module
@@ -76,19 +80,17 @@ class NaoSpeechRecognition(ALModule):
 
     @Invalidate
     def _invalidate(self, context):
-        constants.unregister_almodule(self._name)
-        self._memory = None
-
-
-    def clear(self):
         """
-        Clean all up
+        Component invalidated
         """
         # Clear vocabulary
         self._listeners.clear()
 
-        # Unsubscribe
+        # Unsubscribe from the speech recognition
         self.__unsubscribe()
+        
+        # Unregister the module
+        constants.unregister_almodule(self._name)
 
         # Clear references
         self._memory = None

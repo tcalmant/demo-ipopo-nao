@@ -3,7 +3,6 @@
 """
 Nao text-to-speech service
 """
-from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides
 
 # Module version
 __version_info__ = (0, 1, 0)
@@ -19,6 +18,10 @@ from naoqi import ALProxy
 
 # Local module
 import internals.constants as constants
+
+# Pelix
+from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides,\
+    Validate, Invalidate
 
 # Standard library
 import logging
@@ -41,26 +44,34 @@ class NaoTTS(object):
         """
         Sets up members
         """
+        self._tts = None
+
+        # Authorization to speak
+        self._pause_speak = threading.Event()
+        self._can_speak.set()
+        self.__speaking_lock = threading.Lock()
+    
+    
+    @Validate
+    def validate(self, context):
+        """
+        Component validated
+        """
         # Set up the TTS proxy
         self._tts = ALProxy("ALTextToSpeech")
 
-        # Authorization to speak
-        self._can_speak = threading.Event()
-        self._can_speak.set()
-        self.__speaking_lock = threading.Lock()
 
-
-    def clear(self):
+    @Invalidate
+    def invalidate(self, context):
         """
-        Clean up service usage
+        Component invalidated
         """
         # Stop using the proxy
         self._tts = None
 
         # Unlock everything
         self._can_speak.set()
-
-
+        
 
     def say(self, sentence):
         """
