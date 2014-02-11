@@ -6,9 +6,10 @@ Nao's code of a demonstration project for the
 
 Nao is a robot by `Aldebaran Robotics <http://www.aldebaran-robotics.com/>`_.
 
-This project is based on `iPOPO <https://ipopo.coderxpress.net>`_, an SOCM
-framework in Python, to wrap Nao API (ALModule, ALProxy, ...) into different
-components. 
+This project is based on `iPOPO <https://ipopo.coderxpress.net>`_, a 
+Service-Oriented Component Model (SOCM) framework in Python, to wrap Nao
+API (ALModule, ALProxy, ...) into different components which provide and
+consume services.
 
 It uses MQTT to send and receive message to/from
 `OpenHAB <http://www.openhab.org/>`_, to control Home Automation devices, like
