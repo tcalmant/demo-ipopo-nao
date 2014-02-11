@@ -47,6 +47,7 @@ DEFAULT_RADIO = RADIO_MAP['radio']
 @Provides('nao.radio')
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
+@Requires('_behaviour', 'nao.behaviour')
 @Instantiate('radio-control-mqtt')
 class RadioMqttControll(object):
     """
@@ -59,7 +60,7 @@ class RadioMqttControll(object):
         # Injected service
         self._mqtt = None
         self._speech = None
-
+        self._behaviour = None
 
     def handle_order(self, order):
         """
@@ -69,7 +70,10 @@ class RadioMqttControll(object):
         """
         # Get the order
         value = RADIO_MAP.get(order, DEFAULT_RADIO)
-
+        if value == 'radio':
+            self._behaviour.launch_behaviour('dance_twist')
+        elif value == 'off':
+            self._behaviour.launch_behaviour('neutral')
         # Send the order using MQTT
         self._mqtt.publish("/nao/openhab/radio", str(value))
 
