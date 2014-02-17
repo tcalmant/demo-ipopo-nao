@@ -35,8 +35,6 @@ _logger = logging.getLogger(__name__)
 #-------------------------------------------------------------------------------
 
 BEHAVIOURS_MAP = {'danse': 'dance_twist',
-                  'droite': 'show_right',
-                  'gauche': 'show_left',
                   'bonjour': 'Hello',
                   'hello': 'Hello',
                   'merci': 'Salute_1',
@@ -144,6 +142,8 @@ class NaoBehaviour(object):
         self.launch_behaviour(BEHAVIOURS_MAP.get(word, DEFAULT_BEHAVIOUR))
         if(word=='lèftoi'):
             self._mqtt.publish("/nao/openhab/radio" ,"8")
+        if(word=='danse'):
+            self._mqtt.publish("/nao/openhab/radio" ,"9")
         _logger.info("word=%s", word)
 
 
