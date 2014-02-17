@@ -22,6 +22,7 @@ from naoqi import ALProxy
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
     Instantiate, Validate, Invalidate
+import pelix.services
 
 # Standard library
 import logging
@@ -55,6 +56,7 @@ DEFAULT_BEHAVIOUR = "Neutral"
 @ComponentFactory('nao-behaviour-control')
 @Provides('nao.behaviour')
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
+@Requires('_mqtt', pelix.services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Instantiate('nao-behaviour-control')
 class NaoBehaviour(object):
     """
@@ -66,7 +68,9 @@ class NaoBehaviour(object):
         """
         # Injected service
         self._speech = None
-
+        
+        # inject mqtt
+        self._mqtt = None
         # Behaviour manager
         self._manager = None
 
@@ -153,7 +157,11 @@ class NaoBehaviour(object):
 
         # Go in neutral mode
         self.launch_behaviour(DEFAULT_BEHAVIOUR)
-
+        # start face tracking
+        self.launch_behaviour("mvt_tracker")
+        # lance son via mqtt
+        self._mqtt.publish("/nao/openhab/radio" ,"8")
+        
         # Register to some words
         self._speech.add_listener(self, list(BEHAVIOURS_MAP.keys()))
 
