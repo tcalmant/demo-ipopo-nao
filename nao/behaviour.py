@@ -42,7 +42,11 @@ BEHAVIOURS_MAP = {'danse': 'dance_twist',
                   'merci': 'Salute_1',
                   'navette': 'SpaceShuttle',
                   'applaudi': 'Applause_1',
-                  'étire': 'strech1',
+                  'étire': 'stretch1',
+                  'assier-toi': 'sit_down',
+                  'lève-toi': 'Neutral',
+                  'lèftoi': 'Neutral',
+                  'stop': 'Neutral',
                   'bravo': 'winner'}
 """
 Order -> Behaviour name association
@@ -138,6 +142,9 @@ class NaoBehaviour(object):
         """
         # TODO: Add a threshold to handle the word only if possible
         self.launch_behaviour(BEHAVIOURS_MAP.get(word, DEFAULT_BEHAVIOUR))
+        if(word=='lèftoi'):
+            self._mqtt.publish("/nao/openhab/radio" ,"8")
+        _logger.info("word=%s", word)
 
 
     @Validate

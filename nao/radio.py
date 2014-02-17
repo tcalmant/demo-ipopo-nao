@@ -69,11 +69,13 @@ class RadioMqttControll(object):
         :param order: The order to send to OpenHAB (off, radio or change)
         """
         # Get the order
+        _logger.info("radio word=%s", order)
         value = RADIO_MAP.get(order, DEFAULT_RADIO)
-        if value == 'radio':
+        if value :
             self._behaviour.launch_behaviour('dance_twist')
-        elif value == 'off':
-            self._behaviour.launch_behaviour('neutral')
+        else:
+            self._behaviour.stop_behaviour('dance_twist')
+            self._behaviour.launch_behaviour('Neutral')
         # Send the order using MQTT
         self._mqtt.publish("/nao/openhab/radio", str(value))
 

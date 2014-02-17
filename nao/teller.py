@@ -34,6 +34,7 @@ _logger = logging.getLogger(__name__)
 @ComponentFactory('nao-teller')
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
 @Requires('_tts', internals.constants.SERVICE_TTS)
+@Requires('_mqtt', services.SERVICE_MQTT_CONNECTOR_FACTORY)
 @Provides('nao.teller')
 @Provides(services.SERVICE_MQTT_LISTENER)
 @Property('_topics', services.PROP_MQTT_TOPICS, '/openhab/nao/+')
@@ -48,7 +49,8 @@ class NaoStateTeller(object):
         """
         # Properties
         self._topics = None
-
+        # inject mqtt
+        self._mqtt = None
         # Nao services
         self._speech = None
         self._tts = None
@@ -78,6 +80,8 @@ class NaoStateTeller(object):
         # Store state
         if item == "door":
             self._door_state = payload
+            if(payload=='OPEN'):
+                self._mqtt.publish("/nao/openhab/radio" ,"7")
 
         elif item == "temperature":
             # Replace '.' by ',' in numbers (better TTS results)
