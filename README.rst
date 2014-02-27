@@ -3,6 +3,7 @@ Nao-iPOPO Demonstration
 
 Nao's code of a demonstration project for the
 `Eclipse IoT Day Grenoble 2014 <https://wiki.eclipse.org/Eclipse_IoT_Day_Grenoble_2014>`_.
+`[Video]  <http://youtu.be/4vBSJ7csp8g>`_.
 
 Nao is a robot by `Aldebaran Robotics <http://www.aldebaran-robotics.com/>`_.
 
