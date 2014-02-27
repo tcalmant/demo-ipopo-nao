@@ -1,0 +1,40 @@
+
+/**
+ * @authors Shadi Abras, Thomas Calmant, Wafa Johal, Amr Alyafi
+ * @date january 2014
+ */
+
+
+Group	All
+Group	gNao	(All)		
+Group	Status	(All)	
+// Item to show the date 	
+DateTime	Date	"Date [%1$tA, %1$td.%1$tm.%1$tY]"	<calendar>	{ ntp="Europe/Paris:fr_FR" }
+// Temporary item: it is used in order to turn on/off the radio
+Number	Radio_Station	"Radio"	<radio>
+
+// item to control the volume, it used to control the volume of radio
+Dimmer	Volume	"Volume [%.1f %%]"
+
+// items for controlling Philips Hue lamps: color and identsity
+// Theses three items are only for OpenHAB
+Color	Hue_1	"First  bulb"	<hue>	(gNao)		{ hue="1" }
+Color	Hue_2	"Second bulb"	<hue2>	(gNao)		{ hue="2" }
+Color	Hue_3	"Third  bulb"	<hue3>	(gNao)		{ hue="3" }
+
+// The EnOCean contact sensor declaration and its connection by MQTT to the robot NAO 
+Contact	predis_Door_NAO	"Door [MAP(en.map):%s]"	(gNao)		{ enocean="{id=00:8A:9D:BA, eep=D5:00:01, parameter=CONTACT_STATE", mqtt=">[nao:/openhab/nao/door:state:*:default]" }
+// The EnOCean temperature sensor declaration and its connection by MQTT to the robot NAO 
+Number	UG_Flur_TemperatureNAO	"Temperature [%.1f °C]"	<temperature>	(gNao)		{ enocean="{id=00:88:CA:07, eep=A5:02:05, parameter=TEMPERATURE}", mqtt=">[nao:/openhab/nao/temperature:state:*:default]" }
+// The Radio Declarations: Connection MQTT with the robot NAO
+Number	radio	"Radio [MAP(mqtt.map):%d]"	<color>	{ mqtt="<[nao:/nao/openhab/radio:state:default]" }
+// The weather declaration
+Group	Weather_Chart	<weather>	(Weather)	
+Number	Weather_Temperature	"Exterior temperature [%.1f °C]"	<temperature>	(Weather_Chart)		{ http="<[http://weather.yahooapis.com/forecastrss?w=12724717&u=c:60000:XSLT(yahoo_weather_temperature.xsl)]", mqtt=">[nao:/openhab/nao/weather:state:*:default]" }
+Number	Weather_Temp_Max	"Maximum temperature of the day [%.1f °C]"	<temperature>	(Weather_Chart)	
+Number	Weather_Temp_Min	"Minimum temperature of the day [%.1f °C]"	<temperature>	(Weather_Chart)	
+// The Philips Hue Declarations: Connection MQTT with the robot NAO
+Number	hue1color	"HUE 1 - MQTT  Color [MAP(mqtt.map):%d]"	<color>	(gNao)		{ mqtt="<[nao:/nao/openhab/hue1/color:state:default]" }
+Number	hue2color	"HUE 2 - MQTT  Color [MAP(mqtt.map):%d]"	<color>	(gNao)		{ mqtt="<[nao:/nao/openhab/hue2/color:state:default]" }
+Number	hue3color	"HUE 3 - MQTT  Color [MAP(mqtt.map):%d]"	<color>	(gNao)		{ mqtt="<[nao:/nao/openhab/hue3/color:state:default]" }
+

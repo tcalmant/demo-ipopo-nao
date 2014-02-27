@@ -1,0 +1,37 @@
+
+/**
+ * @authors Shadi Abras, Thomas Calmant, Wafa Johal, Amr Alyafi 
+ * @date january 2014
+ */
+ 
+ 
+sitemap ExperimentaBMS label="Coupling Nao Robot and Smart-Home using iPOPO & OpenHAB platforms"
+{
+	Frame label="NAO - OpenHAB : Shadi Abras, Thomas Calmant, Wafa Johal, Amr Alyafi. @ IsandLaTech, LIG, G-SCOP, G2Elab, Persyval-lab" {
+		
+		Group item=gNao label="NAO Robot" icon="nao2" 
+
+		}			
+
+	Frame label="General" {
+		Text item=Date
+		Text item=Weather_Temperature label="Weather Exterior Temperature" {
+			Frame {
+				Text item=Weather_Temp_Max
+				Text item=Weather_Temp_Min
+			}
+			Frame {
+				Chart item=Weather_Chart period=h refresh=10000
+			}
+		}
+
+		Text label="FM Radio" icon="radio" {
+				Selection item=Radio_Station mappings=[0=off, 1=FranceInter, 2=FIP, 3=FranceInfo, 4=CampusGrenoble, 5=Latina]
+				Slider item=Volume icon="volume-ajust"
+			}
+	}
+}
+
+
+
+

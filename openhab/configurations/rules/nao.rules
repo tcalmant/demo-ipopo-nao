@@ -1,0 +1,230 @@
+
+// Actions available in Scripts and Rules http://code.google.com/p/openhab/wiki/Actions
+// Xtend_Expressions http://www.eclipse.org/xtend/documentation.html#Xtend_Expressions
+
+
+/**
+ * @authors Shadi Abras, Thomas Calmant, Wafa Johal, Amr Alyafi
+ * @date january 2014
+ */
+
+
+
+import java.util.StringTokenizer
+import org.openhab.core.library.types.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+// default language
+var String language = "en"
+// Definition of colors
+var String red  ="0,100,0" // Red
+var String green  ="131,96,41" // Green
+var String yellow  ="60,100,100" // Yellow
+var String blue  ="240,100,100" // blue
+
+
+// Rule for generating a random number
+rule "Nao-Radio Random %"
+	when
+		Item radio  changed or 
+		Item radio received update or 
+		Time cron "0 * * * * ?"	
+	then
+		var int y =0
+		var int u =0
+		var int v =0
+		while (radio.state == 9) {
+					y= (Math::random * 250).intValue
+					u= (Math::random * 100).intValue
+					v= (Math::random * 100).intValue	
+					sendCommand(Hue_2, ""+y+","+u+","+v)
+					
+					y= (Math::random * 50).intValue
+					u= (Math::random * 100).intValue
+					v= (Math::random * 100).intValue	
+					sendCommand(Hue_1, ""+y+","+u+","+v)
+				}
+end
+
+
+
+rule Startup
+when 
+	System started
+then
+	switch(language){
+		case "fr" : say("") 
+		//say("Bienvenue à la demonstration du robot NAO et la plateforme de OpenHAB, cette demonstration est faite dans les laboratoires grenoblois")
+		case "en" : say("Welcome")
+		default : 	{
+			
+			//sendCommand(Hue_1,OFF);
+			//sendCommand(Hue_2,OFF);
+			//sendCommand(Hue_3,OFF)
+		}
+		postUpdate(hue1color,0)
+		postUpdate(hue2color,0)
+		postUpdate(hue3color,0)
+	}	
+end
+
+// This rule for controlling the First Philips Hue Light
+
+rule "Nao-HUE 1 Color"
+	when
+		Item hue1color  changed or 
+		Item hue1color received update
+	then
+		{
+		switch(hue1color.state){
+			case 1: sendCommand(Hue_1, red) 
+			case 2: sendCommand(Hue_1, green) 
+			case 3: sendCommand(Hue_1, yellow) 
+			case 4: sendCommand(Hue_1, blue)
+			default : sendCommand(Hue_1, blue) 
+			}
+		sendCommand(Hue_1,ON)
+		}
+end
+
+// This rule for controlling the second Philips Hue Light
+
+rule "Nao-HUE 2 Color"
+	when
+		Item hue2color  changed or 
+		Item hue2color received update
+	then{
+		switch(hue2color.state){
+			case 1: sendCommand(Hue_2, red) 
+			case 2: sendCommand(Hue_2, green) 
+			case 3: sendCommand(Hue_2, yellow) 
+			case 4: sendCommand(Hue_2, blue) 
+			default : sendCommand(Hue_2, blue)
+			}
+		sendCommand(Hue_2,ON)
+		}
+end
+
+
+// This rule for controlling the third Philips Hue Light
+
+rule "Nao-HUE 3 Color"
+	when
+		Item hue3color  changed or 
+		Item hue3color received update
+	then{
+		switch(hue3color.state){
+			case 1: sendCommand(Hue_3, red) 
+			case 2: sendCommand(Hue_3, green) 
+			case 3: sendCommand(Hue_3, yellow) 
+			case 4: sendCommand(Hue_3, blue) 
+			default : sendCommand(Hue_3, blue)
+		}sendCommand(Hue_3,ON)}
+end
+
+// This rule for controlling the radio
+
+rule "Nao-Radio 3 %"
+	when
+		Item radio  changed or 
+		Item radio received update	
+	then
+		switch(radio.state) {
+					case 0 : playStream("The radio is turned off !")
+					case 1 : playStream("http://www.tv-radio.com/station/le_mouv_mp3/le_mouv_mp3-128k.m3u")
+					case 2 : playStream("http://www.tv-radio.com/station/fip_mp3/fip_mp3-128k.m3u")
+					case 3 : playStream("http://www.tv-radio.com/station/france_info/france_info.m3u")
+					case 4 : playStream("http://live.campusgrenoble.org:9000/rcg112")
+					case 5 : playStream("http://broadcast.infomaniak.net/start-latina-high.mp3")
+					case 6 : playStream("http://www.tv-radio.com/station/france_inter_mp3/france_inter_mp3-128k.m3u")
+					case 7 : playSound("doorbell.mp3")   // la porte est ouverte
+					case 8 : playSound("strauss22s.mp3") // Nao se leve
+					case 9 : playSound("evolution17s.mp3") // danse
+				}
+end
+
+
+
+/**
+ * This rule demonstrates how a NumberItem can be used to easily control the local sound system.
+ * A selection widget in the UI provides easy access for this
+ */
+rule "Select Radio Station"
+	when
+		Item Radio_Station received command
+	then
+		//if(receivedCommand.equals("0")) playStream(null)
+		
+		switch(language){
+			case "fr" : {
+				switch(receivedCommand) {
+					case 0 : playStream(null)
+					case 1 : say("Vous écoutez France Inter")
+					case 2 : say("Vous écoutez Fipe")
+					case 3 : say("Vous écoutez France Info")
+					case 4 : say("Vous écoutez Radio Campus Grenoble")
+					case 5 : say("Vous écoutez Radio Latina")
+				}
+				switch(receivedCommand) {
+					case 0 : say("La radio est éteinte")
+					case 1 : playStream("http://www.tv-radio.com/station/france_inter_mp3/france_inter_mp3-128k.m3u")
+					case 2 : playStream("http://www.tv-radio.com/station/fip_mp3/fip_mp3-128k.m3u")
+					case 3 : playStream("http://www.tv-radio.com/station/france_info/france_info.m3u")
+					case 4 : playStream("http://live.campusgrenoble.org:9000/rcg112")
+					case 5 : playStream("http://broadcast.infomaniak.net/start-latina-high.mp3")
+				}
+						
+			}
+			case "en" : 	{
+				switch(receivedCommand) {
+					case 0 : playStream(null)
+					case 1 : say("You are listening France Inter")
+					case 2 : say("You are listening  Feap")
+					case 3 : say("You are listening  France Info")
+					case 4 : say("You are listening  Radio Campus Grenoble")
+					case 5 : say("You are listening  Radio Latina")
+				}
+				switch(receivedCommand) {
+					case 0 : say("The radio is turned off !")
+					case 1 : playStream("http://www.tv-radio.com/station/france_inter_mp3/france_inter_mp3-128k.m3u")
+					case 2 : playStream("http://www.tv-radio.com/station/fip_mp3/fip_mp3-128k.m3u")
+					case 3 : playStream("http://www.tv-radio.com/station/france_info/france_info.m3u")
+					case 4 : playStream("http://live.campusgrenoble.org:9000/rcg112")
+					case 5 : playStream("http://broadcast.infomaniak.net/start-latina-high.mp3")
+				}
+				
+			}
+			default : say(" Which language ?")
+		}
+	
+end
+
+/**
+ * This rules controls the volume on the local host
+ */
+rule "Volume control"
+	when
+		Item Volume received command
+	then
+		if(receivedCommand instanceof PercentType) {
+			setMasterVolume(receivedCommand as PercentType)
+		} else {
+			if(receivedCommand==INCREASE) increaseMasterVolume(20)
+			if(receivedCommand==DECREASE) decreaseMasterVolume(20)	
+		}
+		postUpdate(Volume, masterVolume * 100)
+end
+
+
+
+
+
+rule "Update max and min temperatures"
+when
+	Item Weather_Temperature changed or
+	Time cron "0 0 0 * * ?" or
+	System started
+then
+	postUpdate(Weather_Temp_Max, Weather_Temperature.maximumSince(now.toDateMidnight).state)
+	postUpdate(Weather_Temp_Min, Weather_Temperature.minimumSince(now.toDateMidnight).state)
+end
