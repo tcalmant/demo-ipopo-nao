@@ -62,10 +62,8 @@ def main(pip, pport):
                                   'pelix.services.eventadmin',
                                   'pelix.shell.eventadmin',
 
-                                  # MQTT
-                                  'pelix.services.mqtt',
-
                                   # Nao Internals
+                                  'internals.mqtt',
                                   'internals.speech',
                                   'internals.touch',
                                   'internals.tts',
