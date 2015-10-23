@@ -22,10 +22,17 @@ import pelix.services
 
 # ------------------------------------------------------------------------------
 
-# Nao IP address
-NAO_IP = "nao.local"
+# Module version
+__version_info__ = (0, 1, 1)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
+
+# Nao IP address
+NAO_IP = "nao.local"
 
 # ------------------------------------------------------------------------------
 
