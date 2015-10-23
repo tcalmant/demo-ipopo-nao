@@ -109,7 +109,8 @@ class MqttConnector(object):
         self._context = context
 
         # Start the notification pool
-        self._pool = pelix.threadpool.ThreadPool(2, "mqtt-notifications")
+        self._pool = pelix.threadpool.ThreadPool(
+            2, logname="mqtt-notifications")
         self._pool.start()
         _logger.info("MQTT connector validated")
 
@@ -129,7 +130,6 @@ class MqttConnector(object):
         self._mqtt = None
         self._pool = None
         self._context = None
-
         _logger.info("MQTT connector invalidated")
 
     @BindField('_listeners')
@@ -137,8 +137,8 @@ class MqttConnector(object):
         """
         A new MQTT listener has been bound
         """
-        topics = to_iterable(svc_ref.get_property(services.PROP_MQTT_TOPICS),
-                             False)
+        topics = to_iterable(
+            svc_ref.get_property(services.PROP_MQTT_TOPICS), False)
         for topic in topics:
             self.__add_listener(topic, listener)
 
@@ -149,8 +149,8 @@ class MqttConnector(object):
         """
         old_topics = set(old_props[services.PROP_MQTT_TOPICS])
         topics = set(
-            to_iterable(svc_ref.get_property(services.PROP_MQTT_TOPICS),
-                        False))
+            to_iterable(
+                svc_ref.get_property(services.PROP_MQTT_TOPICS), False))
 
         # New topics
         for topic in topics.difference(old_topics):
@@ -165,8 +165,8 @@ class MqttConnector(object):
         """
         An MQTT listener is gone
         """
-        topics = to_iterable(svc_ref.get_property(services.PROP_MQTT_TOPICS),
-                             False)
+        topics = to_iterable(
+            svc_ref.get_property(services.PROP_MQTT_TOPICS), False)
         for topic in topics:
             self.__remove_listener(topic, listener)
 
