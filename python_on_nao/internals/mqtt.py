@@ -4,15 +4,6 @@
 MQTT communications service
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # MQTT client
 import pelix.misc.mqtt_client as mqtt
 
@@ -28,11 +19,19 @@ import pelix.threadpool
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory()
 @Provides(services.SERVICE_CONFIGADMIN_MANAGED)
@@ -66,7 +65,6 @@ class MqttConnector(object):
         # Notification pool
         self._pool = None
 
-
     def updated(self, properties):
         """
         Configuration updated
@@ -96,14 +94,12 @@ class MqttConnector(object):
         self._mqtt.on_message = self.__on_message
         self._mqtt.connect(host, port, keepalive)
 
-
     def publish(self, topic, payload, qos=0, retain=False):
         """
         Publishes an MQTT message if the client is connected
         """
         if self._mqtt is not None:
             self._mqtt.publish(topic, payload, qos, retain)
-
 
     @Validate
     def _validate(self, context):
@@ -116,7 +112,6 @@ class MqttConnector(object):
         self._pool = pelix.threadpool.ThreadPool(2, "mqtt-notifications")
         self._pool.start()
         _logger.info("MQTT connector validated")
-
 
     @Invalidate
     def _invalidate(self, context):
@@ -137,7 +132,6 @@ class MqttConnector(object):
 
         _logger.info("MQTT connector invalidated")
 
-
     @BindField('_listeners')
     def _bind_listener(self, field, listener, svc_ref):
         """
@@ -148,16 +142,15 @@ class MqttConnector(object):
         for topic in topics:
             self.__add_listener(topic, listener)
 
-
     @UpdateField('_listeners')
     def _update_listener(self, field, listener, svc_ref, old_props):
         """
         A listener has been updated
         """
         old_topics = set(old_props[services.PROP_MQTT_TOPICS])
-        topics = set(to_iterable(
-                             svc_ref.get_property(services.PROP_MQTT_TOPICS),
-                             False))
+        topics = set(
+            to_iterable(svc_ref.get_property(services.PROP_MQTT_TOPICS),
+                        False))
 
         # New topics
         for topic in topics.difference(old_topics):
@@ -166,7 +159,6 @@ class MqttConnector(object):
         # Removed old ones
         for topic in old_topics.difference(topics):
             self.__remove_listener(topic, listener)
-
 
     @UnbindField('_listeners')
     def _unbind_listener(self, field, listener, svc_ref):
@@ -178,7 +170,6 @@ class MqttConnector(object):
         for topic in topics:
             self.__remove_listener(topic, listener)
 
-
     def __add_listener(self, topic, listener):
         """
         Adds a topic listener
@@ -186,7 +177,6 @@ class MqttConnector(object):
         try:
             # Get current listeners
             listeners = self._topics[topic]
-
         except KeyError:
             # New topic: subscribe to it
             listeners = self._topics[topic] = set()
@@ -194,7 +184,6 @@ class MqttConnector(object):
 
         # Store the listener
         listeners.add(listener)
-
 
     def __remove_listener(self, topic, listener):
         """
@@ -207,11 +196,9 @@ class MqttConnector(object):
                 # No more reference to the topic, unsubscribe
                 del self._topics[topic]
                 self.__unsubscribe(topic)
-
         except KeyError:
             # Unused topic or listener not registered for it
             pass
-
 
     def __on_connect(self, client, result_code):
         """
@@ -224,7 +211,6 @@ class MqttConnector(object):
             # Subscribe to topics
             for topic in self._topics:
                 client.subscribe(topic, 0)
-
 
     def __on_message(self, client, msg):
         """
@@ -243,11 +229,9 @@ class MqttConnector(object):
             # Notify them using the pool
             self._pool.enqueue(self.__notify_listeners, all_listeners,
                                topic, msg.payload, msg.qos)
-
         except KeyError:
             # No listener for this topic
             pass
-
 
     def __notify_listeners(self, listeners, topic, payload, qos):
         """
@@ -256,10 +240,8 @@ class MqttConnector(object):
         for listener in listeners:
             try:
                 listener.handle_mqtt_message(topic, payload, qos)
-
             except Exception as ex:
                 _logger.exception("Error calling MQTT listener: %s", ex)
-
 
     def __subscribe(self, topic):
         """
@@ -267,7 +249,6 @@ class MqttConnector(object):
         """
         if self._mqtt is not None:
             self._mqtt.subscribe(topic, 0)
-
 
     def __unsubscribe(self, topic):
         """

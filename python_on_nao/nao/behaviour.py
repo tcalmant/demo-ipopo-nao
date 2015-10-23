@@ -4,15 +4,6 @@
 Nao movements
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao Internals
 import internals.constants
 
@@ -28,11 +19,16 @@ import pelix.services
 import logging
 import time
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
-
-#-------------------------------------------------------------------------------
 
 BEHAVIOURS_MAP = {'danse': 'dance_twist',
                   'bonjour': 'Hello',
@@ -53,7 +49,8 @@ Order -> Behaviour name association
 DEFAULT_BEHAVIOUR = "Neutral"
 """ Default behaviour """
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-behaviour-control')
 @Provides('nao.behaviour')
@@ -70,12 +67,11 @@ class NaoBehaviour(object):
         """
         # Injected service
         self._speech = None
-        
+
         # inject mqtt
         self._mqtt = None
         # Behaviour manager
         self._manager = None
-
 
     def get_behaviours(self):
         """
@@ -85,7 +81,6 @@ class NaoBehaviour(object):
         """
         return self._manager.getInstalledBehaviors(), \
             self._manager.getRunningBehaviors()
-
 
     def launch_behaviour(self, behaviour, blocking=False):
         """
@@ -102,18 +97,14 @@ class NaoBehaviour(object):
                 # finish.
                 if not blocking:
                     self._manager.post.runBehavior(behaviour)
-
                 else:
                     # Clean up after the blocking code
                     self._manager.runBehavior(behaviour)
                     self._manager.stopBehavior(behaviour)
-
             else:
                 _logger.warning("A behaviour is already running")
-
         else:
             _logger.warning("Unknown behaviour: %s", behaviour)
-
 
     def stop_behaviour(self, behaviour):
         """
@@ -126,10 +117,8 @@ class NaoBehaviour(object):
             # Stop it, and wait a little
             self._manager.stopBehavior(behaviour)
             time.sleep(.3)
-
         else:
             _logger.info("Behaviour %s is not running", behaviour)
-
 
     def word_recognized(self, word, all_words):
         """
@@ -140,12 +129,12 @@ class NaoBehaviour(object):
         """
         # TODO: Add a threshold to handle the word only if possible
         self.launch_behaviour(BEHAVIOURS_MAP.get(word, DEFAULT_BEHAVIOUR))
-        if(word=='lèftoi'):
-            self._mqtt.publish("/nao/openhab/radio" ,"8")
-        if(word=='danse'):
-            self._mqtt.publish("/nao/openhab/radio" ,"9")
+        if word == 'lèftoi':
+            # "lèftoi" instead of "lève toi" (to ease speech recognition)
+            self._mqtt.publish("/nao/openhab/radio", "8")
+        elif word == 'danse':
+            self._mqtt.publish("/nao/openhab/radio", "9")
         _logger.info("word=%s", word)
-
 
     @Validate
     def _validate(self, context):
@@ -167,11 +156,10 @@ class NaoBehaviour(object):
         # start face tracking
         self.launch_behaviour("mvt_tracker")
         # lance son via mqtt
-        self._mqtt.publish("/nao/openhab/radio" ,"8")
-        
+        self._mqtt.publish("/nao/openhab/radio", "8")
+
         # Register to some words
         self._speech.add_listener(self, list(BEHAVIOURS_MAP.keys()))
-
 
     @Invalidate
     def _invalidate(self, context):

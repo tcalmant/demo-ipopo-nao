@@ -4,15 +4,6 @@
 MQTT Hue message sender
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao Internals
 import internals.constants
 
@@ -24,11 +15,16 @@ import pelix.services
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
-
-#-------------------------------------------------------------------------------
 
 COLOR_MAP = {'red': 1,
              'green': 2,
@@ -48,7 +44,8 @@ OpenHAB MQTT color map
 DEFAULT_COLOR = COLOR_MAP['blue']
 """ Default color: blue """
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('hue-control-mqtt')
 @Provides('nao.hue')
@@ -76,7 +73,6 @@ class HueMqttControll(object):
         # Property
         self._events_topics = None
 
-
     def _make_topic(self, lamp, action):
         """
         Prepares the MQTT topic for the given action
@@ -85,7 +81,6 @@ class HueMqttControll(object):
         :param action: Action on the lamp (color, percent)
         """
         return "/nao/openhab/hue{0}/{1}".format(lamp, action)
-
 
     def color(self, lamp, color):
         """
@@ -104,7 +99,6 @@ class HueMqttControll(object):
         color_value = COLOR_MAP.get(color.lower(), DEFAULT_COLOR)
         self._mqtt.publish(self._make_topic(lamp, "color"), str(color_value))
 
-
     def percent(self, lamp, value):
         """
         Changes the color percentage
@@ -118,7 +112,6 @@ class HueMqttControll(object):
             value = 100
 
         self._mqtt.publish(self._make_topic(lamp, "percent"), str(value))
-
 
     def handle_event(self, topic, properties):
         """

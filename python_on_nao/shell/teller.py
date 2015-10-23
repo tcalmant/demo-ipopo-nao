@@ -4,15 +4,6 @@
 MQTT Hue message sender
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Pelix
 from pelix.ipopo.decorators import ComponentFactory, Provides, Requires, \
     Instantiate
@@ -21,11 +12,19 @@ import pelix.shell
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-shell-teller')
 @Provides(pelix.shell.SHELL_COMMAND_SPEC)
@@ -42,13 +41,11 @@ class TellerShell(object):
         # Injected service
         self._teller = None
 
-
     def get_namespace(self):
         """
         Called by the shell service: returns the namespace of this component
         """
         return "nao"
-
 
     def get_methods(self):
         """
@@ -58,7 +55,6 @@ class TellerShell(object):
                 ('say_temperature', self.say_temperature),
                 ('say_weather', self.say_weather),
                 ('say_door', self.say_door)]
-
 
     def say(self, io_handler, *words):
         """
@@ -72,13 +68,11 @@ class TellerShell(object):
         """
         self._teller.say_door()
 
-
     def say_temperature(self, io_handler):
         """
         Says the last known value of the interior temperature
         """
         self._teller.say_temperature()
-
 
     def say_weather(self, io_handler):
         """

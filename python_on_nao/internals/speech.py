@@ -4,15 +4,6 @@
 Nao speech controller
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao API
 from naoqi import ALProxy, ALModule
 
@@ -28,11 +19,19 @@ import pelix.services
 import logging
 import threading
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-speech')
 @Provides(constants.SERVICE_SPEECH)
@@ -68,7 +67,7 @@ class NaoSpeechRecognition(ALModule):
         self.__lock = threading.RLock()
         self._can_recog = threading.Event()
         self._single_recognized = threading.Event()
-
+        self._single_result = ""
 
     @Validate
     def _validate(self, context):
@@ -101,7 +100,6 @@ class NaoSpeechRecognition(ALModule):
 
         _logger.debug("Speech ready")
 
-
     @Invalidate
     def _invalidate(self, context):
         """
@@ -120,18 +118,15 @@ class NaoSpeechRecognition(ALModule):
         self._memory = None
         self._recog = None
 
-
     def __unsubscribe(self):
         """
         Unsubscribe from events
         """
         try:
             self._memory.unsubscribeToEvent("WordRecognized", self._name)
-
         except:
             # Ignore errors
             _logger.debug("Error unsubscribing speech recognition")
-
         finally:
             # In any case, resume the TTS service
             if self._tts is not None:
@@ -139,7 +134,6 @@ class NaoSpeechRecognition(ALModule):
 
             # Authorize again
             self._can_recog.set()
-
 
     def handle_event(self, topic, properties):
         """
@@ -164,7 +158,6 @@ class NaoSpeechRecognition(ALModule):
                 # Start recognition
                 self.recognize()
 
-
     def add_listener(self, listener, words):
         """
         Adds a speech listener
@@ -175,7 +168,6 @@ class NaoSpeechRecognition(ALModule):
         self._listeners[listener] = words
         _logger.info("Adding words: %s (%s)", words, type(words).__name__)
 
-
     def remove_listener(self, listener):
         """
         Removes a speech listener
@@ -184,7 +176,6 @@ class NaoSpeechRecognition(ALModule):
         :raise KeyError: Unknown listener
         """
         del self._listeners[listener]
-
 
     def recognize(self, words=None):
         """
@@ -210,7 +201,6 @@ class NaoSpeechRecognition(ALModule):
         self._memory.subscribeToEvent("WordRecognized",
                                       self._name,
                                       self.on_word_recognized.__name__)
-
 
     def simple_recognize(self, words):
         """
@@ -242,7 +232,6 @@ class NaoSpeechRecognition(ALModule):
         # Return the found word
         return result
 
-
     def on_single_recognized(self, event, raw_words, identifier):
         """
         A word has been recognized
@@ -253,7 +242,6 @@ class NaoSpeechRecognition(ALModule):
 
         # Prepare next run
         self.__unsubscribe()
-
 
     def on_word_recognized(self, event, raw_words, identifier):
         """

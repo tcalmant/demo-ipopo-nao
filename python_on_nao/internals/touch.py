@@ -4,15 +4,6 @@
 Handles buttons on Nao and converts them into events
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Utilities
 import internals.constants as constants
 
@@ -27,7 +18,14 @@ import pelix.services
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
@@ -40,10 +38,12 @@ TOUCH_event_MAP = {  # Head
 """
 Touch events, sharing the same callback signature
 
-See: https://community.aldebaran-robotics.com/doc/1-14/naoqi/sensors/alsensors-api.html#event-list
+See: https://community.aldebaran-robotics.com/doc/1-14/naoqi/sensors/
+     alsensors-api.html#event-list
 """
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-touch')
 @Requires('_event', pelix.services.SERVICE_EVENT_ADMIN)
@@ -68,7 +68,6 @@ class NaoTouch(ALModule):
         # Proxy to Nao's memory
         self._memory = None
 
-
     @Validate
     def _validate(self, context):
         """
@@ -88,7 +87,6 @@ class NaoTouch(ALModule):
             self._memory.subscribeToEvent(event, self._name,
                                           self.on_touch_sensed.__name__)
 
-
     @Invalidate
     def _invalidate(self, context):
         """
@@ -104,7 +102,6 @@ class NaoTouch(ALModule):
         # Clean up
         self._memory = None
 
-
     def on_touch_sensed(self, event, value, identifier):
         """
         A touch button has been... touched
@@ -118,7 +115,6 @@ class NaoTouch(ALModule):
         try:
             # Get the local name
             event_name = TOUCH_event_MAP[event]
-
         except KeyError:
             # Unknown name, ignore
             return

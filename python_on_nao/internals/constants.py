@@ -4,6 +4,11 @@
 Nao services constants
 """
 
+# Standard library
+import sys
+
+# ------------------------------------------------------------------------------
+
 # Module version
 __version_info__ = (0, 1, 0)
 __version__ = ".".join(str(x) for x in __version_info__)
@@ -11,12 +16,8 @@ __version__ = ".".join(str(x) for x in __version_info__)
 # Documentation strings format
 __docformat__ = "restructuredtext en"
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-# Standard library
-import sys
-
-#-------------------------------------------------------------------------------
 
 def register_almodule(name, module):
     """
@@ -31,7 +32,7 @@ def unregister_almodule(name):
     """
     delattr(sys.modules['__main__'], name)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 SERVICE_TTS = "nao.internals.tts"
 """

@@ -4,15 +4,6 @@
 Nao LEDs color changer
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao SDK
 from naoqi import ALProxy
 
@@ -23,11 +14,16 @@ from pelix.ipopo.decorators import ComponentFactory, Provides, Instantiate, \
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
-
-#-------------------------------------------------------------------------------
 
 COLOR_MAP = {'red': 0x00FF0000,
              'green': 0x00009900,
@@ -47,7 +43,8 @@ Handled colors
 DEFAULT_COLOR = 0x00FFFFFF
 """ Default color: white """
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('leds-control')
 @Provides('nao.leds')
@@ -63,7 +60,6 @@ class LedsControl(object):
         # LEDs proxy
         self._leds = None
 
-
     def change_leds(self, color):
         """
         Changes the color of the LEDs on the robot
@@ -73,7 +69,6 @@ class LedsControl(object):
         # Change color. Transition lasts 1 second
         self._leds.fadeRGB('AllLeds', COLOR_MAP.get(color, DEFAULT_COLOR), 1.0)
 
-
     @Validate
     def _validate(self, context):
         """
@@ -81,7 +76,6 @@ class LedsControl(object):
         """
         # Prepare the LED proxy
         self._leds = ALProxy('ALLeds')
-
 
     @Invalidate
     def _invalidate(self, context):

@@ -4,15 +4,6 @@
 MQTT Hue message sender
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Internals
 import internals.constants
 
@@ -24,11 +15,19 @@ import pelix.shell
 # Standard library
 import logging
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-shell-speech')
 @Provides(pelix.shell.SHELL_COMMAND_SPEC)
@@ -45,20 +44,17 @@ class TellerShell(object):
         # Injected service
         self._speech = None
 
-
     def get_namespace(self):
         """
         Called by the shell service: returns the namespace of this component
         """
         return "nao"
 
-
     def get_methods(self):
         """
         Called by the shell service: returns the list of shell commands
         """
         return [('speech', self.speech_recognition)]
-
 
     def speech_recognition(self, io_handler, *args):
         """

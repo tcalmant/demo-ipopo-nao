@@ -4,15 +4,6 @@
 Nao speech controller
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao Internals
 import internals.constants
 
@@ -25,11 +16,19 @@ import pelix.services as services
 import logging
 import random
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-teller')
 @Requires('_speech', internals.constants.SERVICE_SPEECH)
@@ -69,7 +68,6 @@ class NaoStateTeller(object):
         self._last_temperature = None
         self._last_weather = None
 
-
     def handle_mqtt_message(self, topic, payload, qos):
         """
         An MQTT message has been received
@@ -80,24 +78,20 @@ class NaoStateTeller(object):
         # Store state
         if item == "door":
             self._door_state = payload
-            if(payload=='OPEN'):
-                self._mqtt.publish("/nao/openhab/radio" ,"7")
-
+            if payload == 'OPEN':
+                self._mqtt.publish("/nao/openhab/radio", "7")
         elif item == "temperature":
             # Replace '.' by ',' in numbers (better TTS results)
             self._last_temperature = payload.replace('.', ',')
-
         elif item == "weather":
             # Replace '.' by ',' in numbers (better TTS results)
             self._last_weather = payload.replace('.', ',')
-
 
     def say(self, sentence):
         """
         Says something
         """
         self._tts.say(sentence)
-
 
     def say_door(self):
         """
@@ -113,7 +107,6 @@ class NaoStateTeller(object):
 
         self._tts.say("La porte est {0}".format(state))
 
-
     def say_temperature(self):
         """
         Says the last known interior temperature
@@ -127,7 +120,6 @@ class NaoStateTeller(object):
                        .format(payload)
 
         self._tts.say(sentence)
-
 
     def say_weather(self):
         """
@@ -150,7 +142,6 @@ class NaoStateTeller(object):
 
         self._tts.say(sentence)
 
-
     def word_recognized(self, word, all_words):
         """
         A word has been recognized
@@ -161,7 +152,6 @@ class NaoStateTeller(object):
         # Execute the order
         self.__orders[word]()
 
-
     @Validate
     def _validate(self, context):
         """
@@ -169,7 +159,6 @@ class NaoStateTeller(object):
         """
         # Register to some words
         self._speech.add_listener(self, list(self.__orders.keys()))
-
 
     @Invalidate
     def _invalidate(self, context):

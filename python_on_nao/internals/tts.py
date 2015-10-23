@@ -4,15 +4,6 @@
 Nao text-to-speech service
 """
 
-# Module version
-__version_info__ = (0, 1, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-#-------------------------------------------------------------------------------
-
 # Nao API
 from naoqi import ALProxy
 
@@ -27,11 +18,19 @@ from pelix.ipopo.decorators import ComponentFactory, Instantiate, Provides, \
 import logging
 import threading
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 1, 0)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 _logger = logging.getLogger(__name__)
 
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 @ComponentFactory('nao-tts')
 @Provides(constants.SERVICE_TTS)
@@ -51,7 +50,6 @@ class NaoTTS(object):
         self._can_speak.set()
         self.__speaking_lock = threading.Lock()
 
-
     @Validate
     def validate(self, context):
         """
@@ -59,7 +57,6 @@ class NaoTTS(object):
         """
         # Set up the TTS proxy
         self._tts = ALProxy("ALTextToSpeech")
-
 
     @Invalidate
     def invalidate(self, context):
@@ -71,7 +68,6 @@ class NaoTTS(object):
 
         # Unlock everything
         self._can_speak.set()
-
 
     def say(self, sentence):
         """
@@ -86,13 +82,11 @@ class NaoTTS(object):
             # Say what we have to
             self._tts.say(sentence)
 
-
     def resume(self):
         """
         Allows Nao to speak
         """
         self._can_speak.set()
-
 
     def pause(self):
         """
