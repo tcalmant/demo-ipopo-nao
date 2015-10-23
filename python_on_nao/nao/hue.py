@@ -73,7 +73,8 @@ class HueMqttControll(object):
         # Property
         self._events_topics = None
 
-    def _make_topic(self, lamp, action):
+    @staticmethod
+    def _make_topic(lamp, action):
         """
         Prepares the MQTT topic for the given action
 

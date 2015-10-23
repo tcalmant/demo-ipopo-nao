@@ -233,7 +233,8 @@ class MqttConnector(object):
             # No listener for this topic
             pass
 
-    def __notify_listeners(self, listeners, topic, payload, qos):
+    @staticmethod
+    def __notify_listeners(listeners, topic, payload, qos):
         """
         Notifies listeners of an MQTT message
         """

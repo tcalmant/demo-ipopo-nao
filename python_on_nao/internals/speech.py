@@ -265,7 +265,6 @@ class NaoSpeechRecognition(ALModule):
                 try:
                     # Call the listener
                     listener.word_recognized(word, raw_words[:])
-
                 except Exception as ex:
                     # Something went wrong
                     _logger.exception("Error calling word listener: %s", ex)

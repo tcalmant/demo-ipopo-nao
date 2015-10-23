@@ -37,11 +37,12 @@ def main(pip, pport):
     # We need this broker to be able to construct
     # NAOqi modules and subscribe to other modules
     # The broker must stay alive until the program exists
-    myBroker = ALBroker("myBroker",
-                        "0.0.0.0",  # listen to anyone
-                        0,  # find a free port and use it
-                        pip,  # parent broker IP
-                        pport)  # parent broker port
+    al_broker = ALBroker(
+        "myBroker",
+        "0.0.0.0",  # listen to anyone
+        0,  # find a free port and use it
+        pip,  # parent broker IP
+        pport)  # parent broker port
 
     # Create the Pelix framework
     framework = create_framework((
@@ -94,7 +95,7 @@ def main(pip, pport):
     except KeyboardInterrupt:
         print("Interrupted by user, shutting down")
         framework.stop()
-        myBroker.shutdown()
+        al_broker.shutdown()
         sys.exit(0)
 
 # ------------------------------------------------------------------------------
@@ -114,8 +115,6 @@ if __name__ == "__main__":
     parser.set_defaults(pip=NAO_IP, pport=9559)
 
     (opts, args_) = parser.parse_args()
-    pip = opts.pip
-    pport = opts.pport
 
     # Run the script
-    main(pip, pport)
+    main(opts.pip, opts.pport)

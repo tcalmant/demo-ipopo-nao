@@ -41,7 +41,8 @@ class TellerShell(object):
         # Injected service
         self._teller = None
 
-    def get_namespace(self):
+    @staticmethod
+    def get_namespace():
         """
         Called by the shell service: returns the namespace of this component
         """

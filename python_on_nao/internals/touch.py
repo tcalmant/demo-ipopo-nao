@@ -56,8 +56,6 @@ class NaoTouch(ALModule):
     def __init__(self):
         """
         Sets up members
-
-        :param name: ALModule name
         """
         # Injected service
         self._event = None
