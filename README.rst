@@ -41,7 +41,7 @@ iPOPO
 
 We will use the development version of iPOPO.
 
-#. Download https://github.com/tcalmant/ipopo/archive/dev.zip
+#. Download https://github.com/tcalmant/ipopo/archive/master.zip
 #. Extract it
 #. Move the ``pelix`` into ``python-libs``
 #. Delete the rest
