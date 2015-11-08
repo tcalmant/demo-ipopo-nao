@@ -34,7 +34,7 @@ _logger = logging.getLogger(__name__)
 
 
 @ComponentFactory()
-@Provides(services.SERVICE_CONFIGADMIN_MANAGED)
+@Provides(services.SERVICE_CONFIGADMIN_MANAGED_FACTORY)
 @Property('_pid', constants.SERVICE_PID, services.MQTT_CONNECTOR_FACTORY_PID)
 @Requires('_listeners', services.SERVICE_MQTT_LISTENER,
           aggregate=True, optional=True)
@@ -65,10 +65,11 @@ class MqttConnector(object):
         # Notification pool
         self._pool = None
 
-    def updated(self, properties):
+    def updated(self, conf_pid, properties):
         """
         Configuration updated
 
+        :param conf_pid: Configuration PID (because this is a managed factory)
         :param properties: Configuration properties
         """
         if self._mqtt is not None:
