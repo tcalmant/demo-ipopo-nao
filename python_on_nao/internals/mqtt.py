@@ -84,12 +84,12 @@ class MqttConnector(object):
         # Extract connection properties
         host = properties['host']
         try:
-            port = int(properties['port']
+            port = int(properties['port'])
         except (KeyError, ValueError, TypeError):
             port = 1883
 
         try:
-            keepalive = int(properties['keepalive']
+            keepalive = int(properties['keepalive'])
         except (KeyError, ValueError, TypeError):
             keepalive = 60
 
