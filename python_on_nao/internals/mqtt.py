@@ -35,6 +35,7 @@ _logger = logging.getLogger(__name__)
 
 @ComponentFactory()
 @Provides(services.SERVICE_CONFIGADMIN_MANAGED_FACTORY)
+@Provides('pelix.mqtt.factory')
 @Property('_pid', constants.SERVICE_PID, services.MQTT_CONNECTOR_FACTORY_PID)
 @Requires('_listeners', services.SERVICE_MQTT_LISTENER,
           aggregate=True, optional=True)
